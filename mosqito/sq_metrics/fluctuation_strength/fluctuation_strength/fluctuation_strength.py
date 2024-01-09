@@ -12,9 +12,25 @@ import numpy as np
 from mosqito.sq_metrics.fluctuation_strength.utils import _create_am_cosine, _create_am_noise, _create_fm_cosine
 
 
-def fluctuation_strength():
+def fluctuation_strength(signal, fs):
     """
     Dummy function for calculating fluctuation strength.
-    """
+
+    Parameters
+    ----------
+    signal: numpy.array
+        Time signal values in 'Pa'.
     
-    return 0
+    fs: float
+        Sampling frequency, in Hz.
+
+    Returns
+    -------
+    f_vacil: numpy.array
+        Numpy array containing values of fluctuation strength of input signal,
+        in vacil.
+    """
+
+    Nt = signal.shape[0]
+
+    return np.zeros(Nt)
