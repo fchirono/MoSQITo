@@ -27,12 +27,18 @@ from mosqito.sq_metrics.fluctuation_strength.utils import (
 @pytest.mark.fluctuation_strength  # to skip or run only fluctuation strength tests
 def test_fluctuation_strength():
     """
-    Test function for the Fluctuation Strength calculation
+    Test function for the Fluctuation Strength calculation: a 60 dB SPL, 1 kHz
+    tone, 100% amplitude-modulated at 4 Hz modulation frequency produces 1
+    vacil [1]
+    
+    References
+    ----------
+    [1] H Fastl, E Zwicker, "Psychoacoustics: Facts and Models" (3rd Ed),
+    Springer, 2007.
     """
     
     # -------------------------------------------------------------------------
-    # create test signal:
-    #   60 dB, 1 kHz tone, 100% amplitude-modulated at 4 Hz produces 1 vacil
+    # create test signal
     fs = 48000
     dt = 1/fs
     
@@ -46,11 +52,9 @@ def test_fluctuation_strength():
     fm = 4
     xm = 1*np.cos(2*np.pi*fm*t)
     
-    # TODO: define amplitude of carrier tone, NOT of AM signal!
-    dB = 60
-    A = 0.00002 * (10**(dB / 20))
+    spl_level = 60         # dB SPL (RMS)
     
-    signal = _create_am_sin(A, xm, fc, fs)
+    signal = _create_am_sin(spl_level, fc, xm, fs)
     
     # -------------------------------------------------------------------------
     

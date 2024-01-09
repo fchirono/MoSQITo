@@ -10,18 +10,23 @@ Author:
 import numpy as np
 
 
-def _create_fm_sin(A, xm, k, fc, fs, return_aux_params=False,
+def _create_fm_sin(spl_level, fc, xm, k, fs, return_aux_params=False,
                    print_info=False):
     """
-    Creates a frequency-modulated (FM) signal with peak amplitude 'A', 
-    cosine carrier at frequency 'fc', modulating signal 'xm', and sampling
-    frequency 'fs'. The FM signal length is the same as the length of 'xm'. 
+    Creates a frequency-modulated (FM) signal with sinusoidal carrier of level
+    'spl_level' (in dB SPL) and frequency 'fc', arbitrary modulating signal
+    'xm', and sampling frequency 'fs'. The FM signal length is the same as the
+    length of 'xm'. 
     
     Parameters
     ----------
-    A: float
-        Peak amplitude of the resulting FM signal.
-    
+    spl_level: float
+        Sound Pressure Level [ref 20 uPa RMS] of the (unmodulated) carrier sine
+        wave.
+        
+    fc: float
+        Carrier frequency, in Hz. Must be less than 'fs/2'.
+        
     xm: numpy.array
         Numpy array containing the modulating signal.
     
@@ -29,10 +34,7 @@ def _create_fm_sin(A, xm, k, fc, fs, return_aux_params=False,
         Frequency sensitivity of the modulator. This is equal to the frequency
         deviation in Hz away from 'fc' per unit amplitude of the modulating
         signal 'xm'.
-    
-    fc: float
-        Carrier frequency, in Hz. Must be less than 'fs/2'.
-    
+
     fs: float
         Sampling frequency, in Hz.
     
@@ -62,8 +64,10 @@ def _create_fm_sin(A, xm, k, fc, fs, return_aux_params=False,
     # instantaneous frequency of FM signal
     inst_freq = fc + k*xm
     
-    # FM signal, normalised to peak amplitude 'A'
-    y_fm = A*np.sin(2*np.pi* np.cumsum(inst_freq)*dt)
+    # FM signal
+    p_ref = 20e-6
+    A = np.sqrt(2) * p_ref * 10**(spl_level/20)
+    y_fm = A*np.sin(2*np.pi * np.cumsum(inst_freq)*dt)
     
     # max frequency deviation
     f_delta = k*np.max(np.abs(xm))

@@ -10,25 +10,27 @@ Author:
 import numpy as np
 
 
-def _create_am_sin(A, xm, fc, fs, print_m=False):
+def _create_am_sin(spl_level, fc, xm, fs, print_m=False):
     """
-    Creates an amplitude-modulated (AM) signal with peak amplitude 'A', 
-    cosine carrier at frequency 'fc', modulating signal 'xm', and sampling
-    frequency 'fs'. The AM signal length is the same as the length of 'xm'. 
+    Creates an amplitude-modulated (AM) signal with sinusoidal carrier of level
+    'spl_level' (in dB SPL) and frequency 'fc', arbitrary modulating signal
+    'xm', and sampling frequency 'fs'. The AM signal length is the same as the
+    length of 'xm'. 
     
     Parameters
     ----------
-    A: float
-        Peak amplitude of the resulting AM signal.
-    
-    xm: numpy.array
-        Numpy array containing the modulating signal.
+    spl_level: float
+        Sound Pressure Level [ref 20 uPa RMS] of the (unmodulated) carrier sine
+        wave.
     
     fc: float
         Carrier frequency, in Hz. Must be less than 'fs/2'.
     
+    xm: numpy.array
+        Numpy array containing the modulating signal.
+        
     fs: float
-        Sampling frequency, in Hz.
+        Sampling frequency, in samples/second (Hz).
     
     print_m: bool, optional
         Flag declaring whether to print the calculated modulation index.
@@ -37,7 +39,7 @@ def _create_am_sin(A, xm, fc, fs, print_m=False):
     Returns
     -------
     y: numpy.array
-        Amplitude-modulated signal with sine carrier
+        Amplitude-modulated signal with sine carrier, in Pascals
         
     Notes
     -----
@@ -53,12 +55,16 @@ def _create_am_sin(A, xm, fc, fs, print_m=False):
     # vector of time samples
     t = np.linspace(0, T-dt, int(T*fs))
     
-    # unitary-amplitude carrier signal
-    xc = np.sin(2*np.pi*fc*t)
+    # Sine wave carrier, with level 'spl_level' and frequency 'fc' [Hz]
+    p_ref = 20e-6
+    A = np.sqrt(2) * p_ref * 10**(spl_level/20)
+    xc = A*np.sin(2*np.pi*fc*t)
 
-    # AM signal, normalised to peak amplitude 'A'
-    y_am = (1 + xm)*xc/2
-    y_am *= A/np.max(np.abs(y_am))
+    # # signal power check - must be close to 'spl_level
+    # sig_power_dB = 10*np.log10(np.var(xc)/(p_ref**2))
+
+    # AM signal
+    y_am = (1 + xm)*xc
 
     # modulation index
     m = np.max(np.abs(xm))

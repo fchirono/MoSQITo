@@ -10,16 +10,18 @@ Author:
 import numpy as np
 
 
-def _create_am_bbn(A, xm, fs, print_m=False):
+def _create_am_bbn(spl_level, xm, fs, print_m=False):
     """
-    Creates a amplitude-modulated (AM) signal with peak amplitude 'A', Gaussian
-    broadband (noise) carrier, modulating signal 'xm', and sampling frequency
-    'fs'. The AM signal length is the same as the length of 'xm'. 
+    Creates a amplitude-modulated (AM) signal of level 'spl_level' (in dB SPL),
+    Gaussian broadband (noise) carrier, arbitrary modulating signal 'xm', and
+    sampling frequency 'fs'. The AM signal length is the same as the length of
+    'xm'. 
     
     Parameters
     ----------
-    A: float
-        Peak amplitude of the resulting AM signal.
+    spl_level: float
+        Sound Pressure Level [ref 20 uPa RMS] of the (unmodulated) carrier
+        broadband signal.
     
     xm: numpy.array
         Numpy array containing the modulating signal.
@@ -51,11 +53,18 @@ def _create_am_bbn(A, xm, fs, print_m=False):
     
     # create vector of zero-mean, unitary std dev random samples
     rng = np.random.default_rng()
-    xc = rng.standard_normal(Nt)
+    xc = rng.standard_normal(Nt)    
 
-    # AM signal, normalised to peak amplitude 'A'
-    y_am = (1 + xm)*xc/2
-    y_am *= A/np.max(np.abs(y_am))
+    # normalise broadband signal energy to 'spl_level' [dB SPL ref 20 uPa]
+    p_ref = 20e-6
+    A_rms = p_ref * 10**(spl_level/20)
+    xc *= A_rms/np.std(xc)
+    
+    # # signal power check - must be close to 'spl_level
+    # sig_power_dB = 10*np.log10(np.var(xc)/(p_ref**2))
+
+    # AM signal
+    y_am = (1 + xm)*xc
 
     # AM modulation index
     m = np.max(np.abs(xm))
