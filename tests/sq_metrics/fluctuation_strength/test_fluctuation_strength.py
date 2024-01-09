@@ -25,7 +25,7 @@ from mosqito.sq_metrics.fluctuation_strength.utils import (
 
 
 @pytest.mark.fluctuation_strength  # to skip or run only fluctuation strength tests
-def test_fluctuation_strength():
+def test_fluctuation_strength_AM_sin():
     """
     Test function for the Fluctuation Strength calculation: a 60 dB SPL, 1 kHz
     tone, 100% amplitude-modulated at 4 Hz modulation frequency produces 1
@@ -54,14 +54,14 @@ def test_fluctuation_strength():
     
     spl_level = 60         # dB SPL (RMS)
     
-    signal = _create_am_sin(spl_level, fc, xm, fs)
+    am_signal = _create_am_sin(spl_level, fc, xm, fs)
     
     # -------------------------------------------------------------------------
     
-    f_vacil = fluctuation_strength(signal, fs)
+    f_vacil_am = fluctuation_strength(am_signal, fs)
     
-    assert f_vacil == 1
+    assert f_vacil_am == 1
 
 
 if __name__ == "__main__":
-    test_fluctuation_strength()
+    test_fluctuation_strength_AM_sin()
