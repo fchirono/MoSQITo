@@ -10,8 +10,8 @@ Author:
 import numpy as np
 
 
-def _create_fm_cosine(A, xm, k, fc, fs, return_aux_params=False,
-                     print_info=False):
+def _create_fm_sin(A, xm, k, fc, fs, return_aux_params=False,
+                   print_info=False):
     """
     Creates a frequency-modulated (FM) signal with peak amplitude 'A', 
     cosine carrier at frequency 'fc', modulating signal 'xm', and sampling
@@ -47,7 +47,7 @@ def _create_fm_cosine(A, xm, k, fc, fs, return_aux_params=False,
     Returns
     -------
     y_fm: numpy.array
-        Frequency-modulated signal with cosine carrier
+        Frequency-modulated signal with sine carrier
     
     aux_params: dict
         Dictionary of auxiliary parameters, containing:
@@ -63,7 +63,7 @@ def _create_fm_cosine(A, xm, k, fc, fs, return_aux_params=False,
     inst_freq = fc + k*xm
     
     # FM signal, normalised to peak amplitude 'A'
-    y_fm = A*np.cos(2*np.pi* np.cumsum(inst_freq)*dt)
+    y_fm = A*np.sin(2*np.pi* np.cumsum(inst_freq)*dt)
     
     # max frequency deviation
     f_delta = k*np.max(np.abs(xm))

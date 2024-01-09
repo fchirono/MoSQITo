@@ -1,3 +1,3 @@
-from mosqito.sq_metrics.fluctuation_strength.utils._create_am_cosine import _create_am_cosine
-from mosqito.sq_metrics.fluctuation_strength.utils._create_am_noise import _create_am_noise
-from mosqito.sq_metrics.fluctuation_strength.utils._create_fm_cosine import _create_fm_cosine
+from mosqito.sq_metrics.fluctuation_strength.utils._create_am_sin import _create_am_sin
+from mosqito.sq_metrics.fluctuation_strength.utils._create_am_bbn import _create_am_bbn
+from mosqito.sq_metrics.fluctuation_strength.utils._create_fm_sin import _create_fm_sin

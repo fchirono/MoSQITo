@@ -10,7 +10,7 @@ Author:
 import numpy as np
 
 
-def _create_am_cosine(A, xm, fc, fs, print_m=False):
+def _create_am_sin(A, xm, fc, fs, print_m=False):
     """
     Creates an amplitude-modulated (AM) signal with peak amplitude 'A', 
     cosine carrier at frequency 'fc', modulating signal 'xm', and sampling
@@ -37,7 +37,7 @@ def _create_am_cosine(A, xm, fc, fs, print_m=False):
     Returns
     -------
     y: numpy.array
-        Amplitude-modulated signal with cosine carrier
+        Amplitude-modulated signal with sine carrier
         
     Notes
     -----
@@ -54,7 +54,7 @@ def _create_am_cosine(A, xm, fc, fs, print_m=False):
     t = np.linspace(0, T-dt, int(T*fs))
     
     # unitary-amplitude carrier signal
-    xc = np.cos(2*np.pi*fc*t)
+    xc = np.sin(2*np.pi*fc*t)
 
     # AM signal, normalised to peak amplitude 'A'
     y_am = (1 + xm)*xc/2

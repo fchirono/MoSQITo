@@ -9,7 +9,8 @@ Author:
 
 import numpy as np
 
-from mosqito.sq_metrics.fluctuation_strength.utils import _create_am_cosine, _create_am_noise, _create_fm_cosine
+from mosqito.sq_metrics.fluctuation_strength.utils import (
+    _create_am_sin, _create_am_bbn, _create_fm_sin)
 
 
 def fluctuation_strength(signal, fs):
@@ -33,4 +34,4 @@ def fluctuation_strength(signal, fs):
 
     Nt = signal.shape[0]
 
-    return np.zeros(Nt)
+    return np.sum(np.zeros(Nt))

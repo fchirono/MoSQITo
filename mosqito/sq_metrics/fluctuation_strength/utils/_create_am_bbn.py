@@ -10,7 +10,7 @@ Author:
 import numpy as np
 
 
-def _create_am_noise(A, xm, fs, print_m=False):
+def _create_am_bbn(A, xm, fs, print_m=False):
     """
     Creates a amplitude-modulated (AM) signal with peak amplitude 'A', Gaussian
     broadband (noise) carrier, modulating signal 'xm', and sampling frequency
