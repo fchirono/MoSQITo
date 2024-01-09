@@ -10,7 +10,7 @@ Author:
 import numpy as np
 
 
-def create_am_cosine(A, xm, fc, fs, print_m=False):
+def _create_am_cosine(A, xm, fc, fs, print_m=False):
     """
     Creates an amplitude-modulated (AM) signal with peak amplitude 'A', 
     cosine carrier at frequency 'fc', modulating signal 'xm', and sampling

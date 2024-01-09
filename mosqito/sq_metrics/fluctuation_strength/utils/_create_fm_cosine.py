@@ -10,7 +10,7 @@ Author:
 import numpy as np
 
 
-def create_fm_cosine(A, xm, k, fc, fs, return_aux_params=False,
+def _create_fm_cosine(A, xm, k, fc, fs, return_aux_params=False,
                      print_info=False):
     """
     Creates a frequency-modulated (FM) signal with peak amplitude 'A', 
