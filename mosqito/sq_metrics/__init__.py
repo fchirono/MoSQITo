@@ -1,3 +1,5 @@
+from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength import fluctuation_strength
+
 from mosqito.sq_metrics.loudness.loudness_ecma.loudness_ecma import loudness_ecma
 from mosqito.sq_metrics.loudness.loudness_zwst.loudness_zwst import loudness_zwst
 from mosqito.sq_metrics.loudness.loudness_zwst.loudness_zwst_freq import (
