@@ -76,6 +76,7 @@ def test_fluctuation_strength_AM_sin():
 # %% Recreate Figures from Sottek et al - DAGA 2021 (Ref. [2])
 
 import matplotlib.pyplot as plt
+from mosqito.utils import freq2bark
 
 
 def fluct_strength_AMtone_fm(fm):
@@ -225,7 +226,46 @@ def fluct_strength_AM_FMtone_L(L, modulation='AM'):
     
     return FS_L_norm70dB
 
-# -----------------------------------------------------------------------------
+
+
+def fluct_strength_FMtone_DeltaF(delta_f):
+    """ This equation (Eq. 4 from Sottek et al [2]) models the effect
+    of the frequency deviation (in Hz) on the Fluctuation Strength of a
+    frequency-modulated (FM), 1.5 kHz reference tone of 70 dB SPL.
+
+    Parameters
+    ----------
+    delta_f : numpy.array
+        Frequency deviation values for a 1.5 kHz FM tone, in Hz.
+        
+    
+    Returns
+    -------
+    FS_DeltaF_norm1kHz5 : numpy.array
+        Array of Fluctuation Strength values, normalised to the value for
+        reference FM tone at 1.5 kHz carrier frequency.
+        
+    
+    References
+    ----------
+    [2] R. Sottek et al, "Perception of Fluctuating Sounds", DAGA 2021
+    https://pub.dega-akustik.de/DAGA_2021/data/articles/000087.pdf
+    """
+    
+    if isinstance(delta_f, (int, float)):
+        delta_f = np.array([delta_f])
+    
+    fc = 1500.
+    
+    delta_z = freq2bark(fc + delta_f) - freq2bark(fc - delta_f)
+    
+    # FS(delta z) / FS_(delta_f = 200 Hz)
+    FS_freq_dev_norm1500Hz = 0.65*delta_z / np.sqrt(1 + (0.35*delta_z)**2)
+    
+    return FS_freq_dev_norm1500Hz
+
+
+# %% -----------------------------------------------------------------------------
 # Figure 1
 fm = np.logspace(-2, 5, 64, base=2)
 
@@ -242,7 +282,7 @@ plt.xlabel(r'$f_m [Hz]$', fontsize=15)
 plt.ylabel(r'$F_{AM}(f_m) \ / \ F_{AM}(8 Hz)$', fontsize=15)
 plt.title('Fig. 1 from Sottek et al (DAGA 2021)', fontsize=15)
 
-
+# -----------------------------------------------------------------------------
 # Figure 2
 FS_FM_fm = fluct_strength_FMtone_fm(fm)/fluct_strength_FMtone_fm(4)
 
@@ -257,7 +297,7 @@ plt.xlabel(r'$f_m [Hz]$', fontsize=15)
 plt.ylabel(r'$F_{FM}(f_m) \ / \ F_{FM}(4 Hz)$', fontsize=15)
 plt.title('Fig. 2 from Sottek et al (DAGA 2021)', fontsize=15)
 
-
+# -----------------------------------------------------------------------------
 # Figure 3
 L_AM = np.linspace(50, 90, 50)
 FS_AM_L = fluct_strength_AM_FMtone_L(L_AM)
@@ -289,6 +329,11 @@ plt.ylabel(r'$F_{FM}(L) \ / \ F_{FM}(70 dB)$', fontsize=15)
 plt.suptitle('Fig. 3 from Sottek et al (DAGA 2021)', fontsize=15)
 
 plt.tight_layout()
+
+
+# Figure 4.a
+
+# fluct_strength_FMtone_DeltaF
 
 # %%
 
