@@ -34,4 +34,4 @@ def fluctuation_strength(signal, fs):
 
     Nt = signal.shape[0]
 
-    return np.sum(np.zeros(Nt))
+    return 0
