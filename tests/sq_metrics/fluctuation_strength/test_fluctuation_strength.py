@@ -92,7 +92,7 @@ def fluct_strength_AMtone_fm(fm):
     Returns
     -------
     FS_AM : numpy.array
-        Array of Fluctuation Strength values for the reference tone, in vacil.
+        Array of Fluctuation Strength values, in vacil.
         
     
     References
@@ -125,7 +125,9 @@ def fluct_strength_AMtone_fm(fm):
     FS_AM_8Hz = FS_AM_4Hz/FS_AM_norm_8Hz(8)
     # ------------------------------------------------------------
     
-    return FS_AM_8Hz*np.array([FS_AM_norm_8Hz(f) for f in fm])
+    FS_AM = FS_AM_8Hz*np.array([FS_AM_norm_8Hz(f) for f in fm])
+    
+    return FS_AM
 
 
 def fluct_strength_FMtone_fm(fm):
@@ -142,7 +144,7 @@ def fluct_strength_FMtone_fm(fm):
     Returns
     -------
     FS_FM : numpy.array
-        Array of Fluctuation Strength values for the reference tone, in vacil.
+        Array of Fluctuation Strength values, in vacil.
         
     
     References
@@ -168,9 +170,60 @@ def fluct_strength_FMtone_fm(fm):
     # 700 Hz frequency deviation and 4 Hz modulation rate is 2 vacil
     FS_FM_4Hz = 2.
     
-    return FS_FM_4Hz*np.array([FS_FM_norm_4Hz(f) for f in fm])
+    FS_FM = FS_FM_4Hz*np.array([FS_FM_norm_4Hz(f) for f in fm]) 
+    
+    return FS_FM
 
 
+def fluct_strength_AM_FMtone_L(L, modulation='AM'):
+    """ This equation (Eq. 3 from Sottek et al [2]) models the effect
+    of the sound level 'L' (in dB SPL) on the Fluctuation Strength of a
+    reference tone of 70 dB SPL, either amplitude-modulated (AM) or
+    frequency-modulated (FM), as per the parameters for Eqs. 1 and 2 from the
+    same Reference.
+    
+    Parameters
+    ----------
+    L : numpy.array
+        Sound levels, in dB SPL.
+        
+    modulation : {'AM', 'FM'}
+        Type of modulation, default is 'AM'.
+    
+    Returns
+    -------
+    FS_L_norm70dB : numpy.array
+        Array of Fluctuation Strength values, normalised to the value for
+        reference tone at 70 dB SPL.
+        
+    
+    References
+    ----------
+    [2] R. Sottek et al, "Perception of Fluctuating Sounds", DAGA 2021
+    https://pub.dega-akustik.de/DAGA_2021/data/articles/000087.pdf
+    """
+    
+    check_modulation = (isinstance(modulation, str)
+                        and modulation.upper() in ['AM', 'FM'])
+    assert check_modulation, "'modulation' must be a string containing either 'AM' or 'FM'!"
+    
+    
+    if isinstance(L, (int, float)):
+        L = np.array([L])
+    
+    if modulation=='AM':
+        a_L = 0.121
+        b_L = 3.243
+    
+    elif modulation=='FM':
+        a_L = 0.384
+        b_L = 1.702
+    
+    
+    # FS(L) / FS(70 dB)
+    FS_L_norm70dB = a_L * b_L**(L/40)
+    
+    return FS_L_norm70dB
 
 # -----------------------------------------------------------------------------
 # Figure 1
@@ -204,6 +257,38 @@ plt.xlabel(r'$f_m [Hz]$', fontsize=15)
 plt.ylabel(r'$F_{FM}(f_m) \ / \ F_{FM}(4 Hz)$', fontsize=15)
 plt.title('Fig. 2 from Sottek et al (DAGA 2021)', fontsize=15)
 
+
+# Figure 3
+L_AM = np.linspace(50, 90, 50)
+FS_AM_L = fluct_strength_AM_FMtone_L(L_AM)
+    
+L_FM = np.linspace(40, 80, 50)
+FS_FM_L = fluct_strength_AM_FMtone_L(L_FM, modulation='FM')
+
+plt.figure()
+plt.subplot(121)
+plt.plot(L_AM, FS_AM_L)
+plt.grid()
+plt.xticks(ticks=np.linspace(50, 90, 5),
+            labels=[f'{x}' for x in np.linspace(50, 90, 5)])
+plt.xlim([50, 90])
+plt.ylim([0, 3.5])
+plt.xlabel(r'$L [dB]$', fontsize=15)
+plt.ylabel(r'$F_{AM}(L) \ / \ F_{AM}(70 dB)$', fontsize=15)
+
+plt.subplot(122)
+plt.plot(L_FM, FS_FM_L)
+plt.grid()
+plt.xticks(ticks=np.linspace(40, 80, 3),
+            labels=[f'{x}' for x in np.linspace(40, 80, 3)])
+plt.xlim([40, 80])
+plt.ylim([0, 3.5])
+plt.xlabel(r'$L [dB]$', fontsize=15)
+plt.ylabel(r'$F_{FM}(L) \ / \ F_{FM}(70 dB)$', fontsize=15)
+
+plt.suptitle('Fig. 3 from Sottek et al (DAGA 2021)', fontsize=15)
+
+plt.tight_layout()
 
 # %%
 
