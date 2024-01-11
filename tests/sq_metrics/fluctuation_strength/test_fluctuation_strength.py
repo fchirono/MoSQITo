@@ -257,122 +257,135 @@ def fluct_strength_FMtone_deltaF_fc(fc, delta_f):
 
 # %% Plot the figures from Sottek et al (DAGA 2021)
 
-import matplotlib.pyplot as plt
-plt.close('all')
+# import matplotlib.pyplot as plt
+# plt.close('all')
 
+# save_fig = False
 
-# -----------------------------------------------------------------------------
-# Figure 1
-fm = np.logspace(-2, 5, 128, base=2)
+# # -----------------------------------------------------------------------------
+# # Figure 1
+# fm = np.logspace(-2, 5, 128, base=2)
 
-FS_AM_fm = fluct_strength_AMtone_fm(fm)/fluct_strength_AMtone_fm(8)
+# FS_AM_fm = fluct_strength_AMtone_fm(fm)/fluct_strength_AMtone_fm(8)
 
-plt.figure(1)
-plt.semilogx(fm, FS_AM_fm)
-plt.grid()
-plt.xticks(ticks = np.logspace(-2, 5, 8, base=2),
-           labels = [f'{x:.02f}' for x in np.logspace(-2, 5, 8, base=2)])
-plt.xlim([0.25, 32])
-plt.ylim([0, 1.2])
-plt.xlabel(r'$f_m$ [Hz]', fontsize=15)
-plt.ylabel(r'$F_{AM}$($f_m$) / $F_{AM}$(8 Hz)', fontsize=15)
-plt.title('Fig. 1 from Sottek et al (DAGA 2021)', fontsize=15)
+# plt.figure(1)
+# plt.semilogx(fm, FS_AM_fm)
+# plt.grid()
+# plt.xticks(ticks = np.logspace(-2, 5, 8, base=2),
+#            labels = [f'{x:.02f}' for x in np.logspace(-2, 5, 8, base=2)])
+# plt.xlim([0.25, 32])
+# plt.ylim([0, 1.2])
+# plt.xlabel(r'$f_m$ [Hz]', fontsize=15)
+# plt.ylabel(r'$F_{AM}$($f_m$) / $F_{AM}$(8 Hz)', fontsize=15)
+# plt.title('Fig. 1 from Sottek et al (DAGA 2021)', fontsize=15)
 
-# -----------------------------------------------------------------------------
-# Figure 2
-FS_FM_fm = fluct_strength_FMtone_fm(fm)/fluct_strength_FMtone_fm(4)
+# if save_fig:
+#     plt.savefig('Fig1_Sottek_etal_DAGA2021.png')
 
-plt.figure(2)
-plt.semilogx(fm, FS_FM_fm)
-plt.grid()
-plt.xticks(ticks=np.logspace(-2, 5, 8, base=2),
-            labels=[f'{x:.02f}' for x in np.logspace(-2, 5, 8, base=2)])
-plt.xlim([0.25, 32])
-plt.ylim([0, 1.2])
-plt.xlabel(r'$f_m$ [Hz]', fontsize=15)
-plt.ylabel(r'$F_{FM}$($f_m$) / $F_{FM}$(4 Hz)', fontsize=15)
-plt.title('Fig. 2 from Sottek et al (DAGA 2021)', fontsize=15)
+# # -----------------------------------------------------------------------------
+# # Figure 2
+# FS_FM_fm = fluct_strength_FMtone_fm(fm)/fluct_strength_FMtone_fm(4)
 
-# -----------------------------------------------------------------------------
-# Figure 3
-L_AM = np.linspace(50, 90, 150)
-FS_AM_L = fluct_strength_AM_FMtone_L(L_AM)
+# plt.figure(2)
+# plt.semilogx(fm, FS_FM_fm)
+# plt.grid()
+# plt.xticks(ticks=np.logspace(-2, 5, 8, base=2),
+#             labels=[f'{x:.02f}' for x in np.logspace(-2, 5, 8, base=2)])
+# plt.xlim([0.25, 32])
+# plt.ylim([0, 1.2])
+# plt.xlabel(r'$f_m$ [Hz]', fontsize=15)
+# plt.ylabel(r'$F_{FM}$($f_m$) / $F_{FM}$(4 Hz)', fontsize=15)
+# plt.title('Fig. 2 from Sottek et al (DAGA 2021)', fontsize=15)
+
+# if save_fig:
+#     plt.savefig('Fig2_Sottek_etal_DAGA2021.png')
+
+# # -----------------------------------------------------------------------------
+# # Figure 3
+# L_AM = np.linspace(50, 90, 150)
+# FS_AM_L = fluct_strength_AM_FMtone_L(L_AM)
     
-L_FM = np.linspace(40, 80, 150)
-FS_FM_L = fluct_strength_AM_FMtone_L(L_FM, modulation='FM')
+# L_FM = np.linspace(40, 80, 150)
+# FS_FM_L = fluct_strength_AM_FMtone_L(L_FM, modulation='FM')
 
-plt.figure(3)
-plt.subplot(121)
-plt.plot(L_AM, FS_AM_L)
-plt.grid()
-plt.xticks(ticks=np.linspace(50, 90, 5),
-            labels=[f'{x}' for x in np.linspace(50, 90, 5)])
-plt.xlim([50, 90])
-plt.ylim([0, 3.5])
-plt.xlabel(r'$L$ [dB]', fontsize=15)
-plt.ylabel(r'$F_{AM}$($L$) / $F_{AM}$(70 dB)', fontsize=15)
+# plt.figure(3)
+# plt.subplot(121)
+# plt.plot(L_AM, FS_AM_L)
+# plt.grid()
+# plt.xticks(ticks=np.linspace(50, 90, 5),
+#             labels=[f'{x}' for x in np.linspace(50, 90, 5)])
+# plt.xlim([50, 90])
+# plt.ylim([0, 3.5])
+# plt.xlabel(r'$L$ [dB]', fontsize=15)
+# plt.ylabel(r'$F_{AM}$($L$) / $F_{AM}$(70 dB)', fontsize=15)
 
-plt.subplot(122)
-plt.plot(L_FM, FS_FM_L)
-plt.grid()
-plt.xticks(ticks=np.linspace(40, 80, 3),
-            labels=[f'{x}' for x in np.linspace(40, 80, 3)])
-plt.xlim([40, 80])
-plt.ylim([0, 3.5])
-plt.xlabel(r'$L$ [dB]', fontsize=15)
-plt.ylabel(r'$F_{FM}$($L$) / $F_{FM}$(70 dB)', fontsize=15)
+# plt.subplot(122)
+# plt.plot(L_FM, FS_FM_L)
+# plt.grid()
+# plt.xticks(ticks=np.linspace(40, 80, 3),
+#             labels=[f'{x}' for x in np.linspace(40, 80, 3)])
+# plt.xlim([40, 80])
+# plt.ylim([0, 3.5])
+# plt.xlabel(r'$L$ [dB]', fontsize=15)
+# plt.ylabel(r'$F_{FM}$($L$) / $F_{FM}$(70 dB)', fontsize=15)
 
-plt.suptitle('Fig. 3 from Sottek et al (DAGA 2021)', fontsize=15)
+# plt.suptitle('Fig. 3 from Sottek et al (DAGA 2021)', fontsize=15)
 
-plt.tight_layout()
+# plt.tight_layout()
 
+# if save_fig:
+#     plt.savefig('Fig3_Sottek_etal_DAGA2021.png')
+    
+# # -----------------------------------------------------------------------------
+# # Figure 5
 
-# -----------------------------------------------------------------------------
-# Figure 5
+# # Freq range approximately covers 'delta_z' range from 0 to 6 Bark
+# delta_f = np.linspace(0, 675, 151, endpoint=True)
 
-# Freq range approximately covers 'delta_z' range from 0 to 6 Bark
-delta_f = np.linspace(0, 675, 151, endpoint=True)
+# delta_z1, FS_FM_deltaF = fluct_strength_FMtone_deltaF_fc(fc=1500, delta_f=delta_f)
 
-delta_z1, FS_FM_deltaF = fluct_strength_FMtone_deltaF_fc(fc=1500, delta_f=delta_f)
+# plt.figure(5)
+# plt.plot(delta_z1, FS_FM_deltaF)
+# plt.grid()
+# plt.ylim([0, 2])
+# plt.xlabel(r'Freq deviation $\Delta z$ [Bark$_{HMS}$] (for fixed $f_c$=1500 Hz)',
+#            fontsize=13)
+# plt.ylabel(r'$F_{BW}$($\Delta$z) / $F_{BW, ref}$', fontsize=15)
+# plt.title(r'Fig. 5 from Sottek et al, DAGA 2021',
+#           fontsize=14)
+# plt.text(1., 0.25, r'*$F_{BW, ref} = F_{BW}( f_c$=1500 Hz, $\Delta f$ = 200 Hz)',
+#          fontsize=14)
 
-plt.figure(5)
-plt.plot(delta_z1, FS_FM_deltaF)
-plt.grid()
-plt.ylim([0, 2])
-plt.xlabel(r'Freq deviation $\Delta z$ [Bark$_{HMS}$] (for fixed $f_c$=1500 Hz)',
-           fontsize=13)
-plt.ylabel(r'$F_{BW}$($\Delta$z) / $F_{BW, ref}$', fontsize=15)
-plt.title(r'Fig. 5 from Sottek et al, DAGA 2021',
-          fontsize=14)
-plt.text(1., 0.25, r'*$F_{BW, ref} = F_{BW}( f_c$=1500 Hz, $\Delta f$ = 200 Hz)',
-         fontsize=14)
+# if save_fig:
+#     plt.savefig('Fig5_Sottek_etal_DAGA2021.png')
+    
+# # -----------------------------------------------------------------------------
+# # Figure 6
 
+# fc = np.linspace(500, 9000, 151, endpoint=True)
 
-# -----------------------------------------------------------------------------
-# Figure 6
+# delta_z2, FS_FM_fc = fluct_strength_FMtone_deltaF_fc(fc=fc, delta_f=200)
 
-fc = np.linspace(500, 9000, 151, endpoint=True)
+# plt.figure(6)
+# plt.semilogx(fc, FS_FM_fc)
+# plt.grid()
 
-delta_z2, FS_FM_fc = fluct_strength_FMtone_deltaF_fc(fc=fc, delta_f=200)
+# plt.xlim([500, 8000])
+# plt.ylim([0, 2])
 
-plt.figure(6)
-plt.semilogx(fc, FS_FM_fc)
-plt.grid()
+# plt.xticks(ticks=np.array([500, 1500, 4500, 8000]),
+#            labels=['0.5', '1.5', '4.5', '8'])
+# plt.xlabel(r'Carrier freq $f_c$ [kHz] (for fixed $\Delta f$=200 Hz)',
+#            fontsize=13)
+# plt.ylabel(r'$F_{CF}$($f_c$) / $F_{CF, ref}$', fontsize=15)
+# plt.title(r'Fig. 6 from Sottek et al, DAGA 2021',
+#           fontsize=14)
+# plt.text(650, 1.75, r'*$F_{CF, ref} = F_{CF}( f_c$=1500 Hz, $\Delta f$ = 200 Hz)',
+#          fontsize=14)
 
-plt.xlim([500, 8000])
-plt.ylim([0, 2])
-
-plt.xticks(ticks=np.array([500, 1500, 4500, 8000]),
-           labels=['0.5', '1.5', '4.5', '8'])
-plt.xlabel(r'Carrier freq $f_c$ [kHz] (for fixed $\Delta f$=200 Hz)',
-           fontsize=13)
-plt.ylabel(r'$F_{CF}$($f_c$) / $F_{CF, ref}$', fontsize=15)
-plt.title(r'Fig. 6 from Sottek et al, DAGA 2021',
-          fontsize=14)
-plt.text(650, 1.75, r'*$F_{CF, ref} = F_{CF}( f_c$=1500 Hz, $\Delta f$ = 200 Hz)',
-         fontsize=14)
-
-
+# if save_fig:
+#     plt.savefig('Fig6_Sottek_etal_DAGA2021.png')
+    
 # %%
 
 if __name__ == "__main__":
