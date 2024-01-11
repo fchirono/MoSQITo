@@ -76,7 +76,8 @@ def test_fluctuation_strength_AM_sin():
 # %% Recreate Figures from Sottek et al - DAGA 2021 (Ref. [2])
 
 import matplotlib.pyplot as plt
-from mosqito.utils import freq2bark
+plt.close('all')
+from mosqito.utils.conversion import freq2bark, bark2freq
 
 
 def fluct_strength_AMtone_fm(fm):
@@ -228,23 +229,32 @@ def fluct_strength_AM_FMtone_L(L, modulation='AM'):
 
 
 
-def fluct_strength_FMtone_DeltaF(delta_f):
+def fluct_strength_FMtone_deltaF_fc(fc, delta_f):
     """ This equation (Eq. 4 from Sottek et al [2]) models the effect
-    of the frequency deviation (in Hz) on the Fluctuation Strength of a
-    frequency-modulated (FM), 1.5 kHz reference tone of 70 dB SPL.
+    of the frequency deviation 'delta_f' (in Hz) or of the carrier frequency
+    'fc' on the Fluctuation Strength of a frequency-modulated (FM) reference
+    tone of 70 dB SPL.
 
     Parameters
     ----------
-    delta_f : numpy.array
-        Frequency deviation values for a 1.5 kHz FM tone, in Hz.
-        
+    delta_f : (Nd,)-shaped numpy.array
+        Frequency deviation value(s), in Hz.
+    
+    fc : (Nc,)-shaped numpy.array
+        Carrier frequency value(s), in Hz.
+    
     
     Returns
     -------
-    FS_DeltaF_norm1kHz5 : numpy.array
-        Array of Fluctuation Strength values, normalised to the value for
-        reference FM tone at 1.5 kHz carrier frequency.
+    FS_DeltaF_norm : (Nd, Nc)-shaped numpy.array
+        Array of Fluctuation Strength values, normalised to the value for a
+        reference FM tone
         
+    
+    Notes
+    -----
+    For an equation describing the effects of the carrier frequency 'fc' on
+    a FM tone of fixed
     
     References
     ----------
@@ -252,17 +262,21 @@ def fluct_strength_FMtone_DeltaF(delta_f):
     https://pub.dega-akustik.de/DAGA_2021/data/articles/000087.pdf
     """
     
+    if isinstance(fc, (int, float)):
+        fc = np.array([fc])
+    
     if isinstance(delta_f, (int, float)):
         delta_f = np.array([delta_f])
     
-    fc = 1500.
+    fc = fc[:, np.newaxis]
+    delta_f = delta_f[np.newaxis, :]
     
     delta_z = freq2bark(fc + delta_f) - freq2bark(fc - delta_f)
     
-    # FS(delta z) / FS_(delta_f = 200 Hz)
-    FS_freq_dev_norm1500Hz = 0.65*delta_z / np.sqrt(1 + (0.35*delta_z)**2)
+    # FS(delta z) / FS_ref
+    FS_freq_dev_norm = 0.65*delta_z / np.sqrt(1 + (0.35*delta_z)**2)
     
-    return FS_freq_dev_norm1500Hz
+    return np.squeeze(delta_z), np.squeeze(FS_freq_dev_norm)
 
 
 # %% -----------------------------------------------------------------------------
@@ -331,9 +345,26 @@ plt.suptitle('Fig. 3 from Sottek et al (DAGA 2021)', fontsize=15)
 plt.tight_layout()
 
 
-# Figure 4.a
+# -----------------------------------------------------------------------------
+# Figure 5
 
-# fluct_strength_FMtone_DeltaF
+# Freq range approximately covers 'delta_z' range from 0 to 6 Bark
+delta_f = np.linspace(0, 675, 101, endpoint=True)
+
+delta_z1, FS_FM_deltaF = fluct_strength_FMtone_deltaF_fc(fc=1500, delta_f=delta_f)
+
+plt.figure()
+plt.plot(delta_z1, FS_FM_deltaF)
+plt.grid()
+plt.ylim([0, 2])
+plt.xlabel(r'Freq deviation $\Delta z$ [Bark$_{HMS}$] (for fixed $f_c$=1500 Hz)',
+           fontsize=13)
+plt.ylabel(r'$F_{BW}$($\Delta$z) / $F_{BW, ref}$', fontsize=15)
+plt.title(r'Fig. 5 from Sottek et al, DAGA 2021',
+          fontsize=14)
+plt.text(1., 0.25, r'*$F_{BW, ref} = F_{BW}( f_c$=1500 Hz, $\Delta f$ = 200 Hz)',
+         fontsize=14)
+
 
 # %%
 
