@@ -228,7 +228,6 @@ def fluct_strength_AM_FMtone_L(L, modulation='AM'):
     return FS_L_norm70dB
 
 
-
 def fluct_strength_FMtone_deltaF_fc(fc, delta_f):
     """ This equation (Eq. 4 from Sottek et al [2]) models the effect
     of the frequency deviation 'delta_f' (in Hz) or of the carrier frequency
@@ -243,18 +242,12 @@ def fluct_strength_FMtone_deltaF_fc(fc, delta_f):
     fc : (Nc,)-shaped numpy.array
         Carrier frequency value(s), in Hz.
     
-    
     Returns
     -------
     FS_DeltaF_norm : (Nd, Nc)-shaped numpy.array
         Array of Fluctuation Strength values, normalised to the value for a
         reference FM tone
         
-    
-    Notes
-    -----
-    For an equation describing the effects of the carrier frequency 'fc' on
-    a FM tone of fixed
     
     References
     ----------
@@ -279,7 +272,7 @@ def fluct_strength_FMtone_deltaF_fc(fc, delta_f):
     return np.squeeze(delta_z), np.squeeze(FS_freq_dev_norm)
 
 
-# %% -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Figure 1
 fm = np.logspace(-2, 5, 64, base=2)
 
@@ -363,6 +356,31 @@ plt.ylabel(r'$F_{BW}$($\Delta$z) / $F_{BW, ref}$', fontsize=15)
 plt.title(r'Fig. 5 from Sottek et al, DAGA 2021',
           fontsize=14)
 plt.text(1., 0.25, r'*$F_{BW, ref} = F_{BW}( f_c$=1500 Hz, $\Delta f$ = 200 Hz)',
+         fontsize=14)
+
+
+# -----------------------------------------------------------------------------
+# Figure 6
+
+fc = np.linspace(500, 9000, 151, endpoint=True)
+
+delta_z2, FS_FM_fc = fluct_strength_FMtone_deltaF_fc(fc=fc, delta_f=200)
+
+plt.figure()
+plt.semilogx(fc, FS_FM_fc)
+plt.grid()
+
+plt.xlim([500, 8000])
+plt.ylim([0, 2])
+
+plt.xticks(ticks=np.array([500, 1500, 4500, 8000]),
+           labels=['0.5', '1.5', '4.5', '8'])
+plt.xlabel(r'Carrier freq $f_c$ [kHz] (for fixed $\Delta f$=200 Hz)',
+           fontsize=13)
+plt.ylabel(r'$F_{CF}$($f_c$) / $F_{CF, ref}$', fontsize=15)
+plt.title(r'Fig. 6 from Sottek et al, DAGA 2021',
+          fontsize=14)
+plt.text(650, 1.75, r'*$F_{CF, ref} = F_{CF}( f_c$=1500 Hz, $\Delta f$ = 200 Hz)',
          fontsize=14)
 
 
