@@ -8,7 +8,6 @@ Author:
     Jan 2024
     
 
-
 References:
     
     [1] H Fastl, E Zwicker, "Psychoacoustics: Facts and Models" (3rd Ed),
@@ -40,11 +39,6 @@ def test_fluctuation_strength_AM_sin():
     Test function for the Fluctuation Strength calculation: a 60 dB SPL, 1 kHz
     tone, 100% amplitude-modulated at 4 Hz modulation frequency produces 1
     vacil [1].
-    
-    References
-    ----------
-    [1] H Fastl, E Zwicker, "Psychoacoustics: Facts and Models" (3rd Ed),
-    Springer, 2007.
     """
     
     # -------------------------------------------------------------------------
@@ -73,12 +67,19 @@ def test_fluctuation_strength_AM_sin():
     assert f_vacil_am == 1
 
 
-# %% Recreate Figures from Sottek et al - DAGA 2021 (Ref. [2])
+# %% Equations from Sottek et al (DAGA 2021)
 
-import matplotlib.pyplot as plt
-plt.close('all')
-from mosqito.utils.conversion import freq2bark, bark2freq
-
+"""
+These expressions describe the perceived fluctuation strength of synthetic,
+stationary amplitude-modulated (AM) or frequency-modulated (FM) sounds. These
+values were obtained via jury tests, and their dependency on each signal
+parameter was approximated by analytical expressions by Sottek et al [2].
+                 
+References
+----------
+    [2] R. Sottek et al, "Perception of Fluctuating Sounds", DAGA 2021
+    https://pub.dega-akustik.de/DAGA_2021/data/articles/000087.pdf
+"""
 
 def fluct_strength_AMtone_fm(fm):
     """ This equation (Eq. 1 from Sottek et al [2]) models the effect
@@ -95,12 +96,7 @@ def fluct_strength_AMtone_fm(fm):
     -------
     FS_AM : numpy.array
         Array of Fluctuation Strength values, in vacil.
-        
-    
-    References
-    ----------
-    [2] R. Sottek et al, "Perception of Fluctuating Sounds", DAGA 2021
-    https://pub.dega-akustik.de/DAGA_2021/data/articles/000087.pdf
+
     """
     
     if isinstance(fm, (int, float)):
@@ -147,12 +143,7 @@ def fluct_strength_FMtone_fm(fm):
     -------
     FS_FM : numpy.array
         Array of Fluctuation Strength values, in vacil.
-        
-    
-    References
-    ----------
-    [2] R. Sottek et al, "Perception of Fluctuating Sounds", DAGA 2021
-    https://pub.dega-akustik.de/DAGA_2021/data/articles/000087.pdf
+
     """
     
     if isinstance(fm, (int, float)):
@@ -197,12 +188,6 @@ def fluct_strength_AM_FMtone_L(L, modulation='AM'):
     FS_L_norm70dB : numpy.array
         Array of Fluctuation Strength values, normalised to the value for
         reference tone at 70 dB SPL.
-        
-    
-    References
-    ----------
-    [2] R. Sottek et al, "Perception of Fluctuating Sounds", DAGA 2021
-    https://pub.dega-akustik.de/DAGA_2021/data/articles/000087.pdf
     """
     
     check_modulation = (isinstance(modulation, str)
@@ -248,11 +233,6 @@ def fluct_strength_FMtone_deltaF_fc(fc, delta_f):
         Array of Fluctuation Strength values, normalised to the value for a
         reference FM tone
         
-    
-    References
-    ----------
-    [2] R. Sottek et al, "Perception of Fluctuating Sounds", DAGA 2021
-    https://pub.dega-akustik.de/DAGA_2021/data/articles/000087.pdf
     """
     
     if isinstance(fc, (int, float)):
@@ -264,7 +244,10 @@ def fluct_strength_FMtone_deltaF_fc(fc, delta_f):
     fc = fc[:, np.newaxis]
     delta_f = delta_f[np.newaxis, :]
     
-    delta_z = freq2bark(fc + delta_f) - freq2bark(fc - delta_f)
+    # Eq. 6.1 from Fastl and Zwicker - Psychoacoustics, 3rd Ed
+    myfreq2bark = lambda f: 13*np.arctan(0.76*f/1000) + 3.5*np.arctan(f/7500)**2
+    
+    delta_z = myfreq2bark(fc + delta_f) - myfreq2bark(fc - delta_f)
     
     # FS(delta z) / FS_ref
     FS_freq_dev_norm = 0.65*delta_z / np.sqrt(1 + (0.35*delta_z)**2)
@@ -272,47 +255,53 @@ def fluct_strength_FMtone_deltaF_fc(fc, delta_f):
     return np.squeeze(delta_z), np.squeeze(FS_freq_dev_norm)
 
 
+# %% Plot the figures from Sottek et al (DAGA 2021)
+
+import matplotlib.pyplot as plt
+plt.close('all')
+
+
 # -----------------------------------------------------------------------------
 # Figure 1
-fm = np.logspace(-2, 5, 64, base=2)
+fm = np.logspace(-2, 5, 128, base=2)
 
 FS_AM_fm = fluct_strength_AMtone_fm(fm)/fluct_strength_AMtone_fm(8)
 
-plt.figure()
+plt.figure(1)
 plt.semilogx(fm, FS_AM_fm)
 plt.grid()
 plt.xticks(ticks = np.logspace(-2, 5, 8, base=2),
            labels = [f'{x:.02f}' for x in np.logspace(-2, 5, 8, base=2)])
 plt.xlim([0.25, 32])
 plt.ylim([0, 1.2])
-plt.xlabel(r'$f_m [Hz]$', fontsize=15)
-plt.ylabel(r'$F_{AM}(f_m) \ / \ F_{AM}(8 Hz)$', fontsize=15)
+plt.xlabel(r'$f_m$ [Hz]', fontsize=15)
+plt.ylabel(r'$F_{AM}$($f_m$) / $F_{AM}$(8 Hz)', fontsize=15)
 plt.title('Fig. 1 from Sottek et al (DAGA 2021)', fontsize=15)
 
 # -----------------------------------------------------------------------------
 # Figure 2
 FS_FM_fm = fluct_strength_FMtone_fm(fm)/fluct_strength_FMtone_fm(4)
 
-plt.figure()
+plt.figure(2)
 plt.semilogx(fm, FS_FM_fm)
 plt.grid()
 plt.xticks(ticks=np.logspace(-2, 5, 8, base=2),
             labels=[f'{x:.02f}' for x in np.logspace(-2, 5, 8, base=2)])
 plt.xlim([0.25, 32])
 plt.ylim([0, 1.2])
-plt.xlabel(r'$f_m [Hz]$', fontsize=15)
-plt.ylabel(r'$F_{FM}(f_m) \ / \ F_{FM}(4 Hz)$', fontsize=15)
+plt.xlabel(r'$f_m$ [Hz]', fontsize=15)
+plt.ylabel(r'$F_{FM}$($f_m$) / $F_{FM}$(4 Hz)', fontsize=15)
 plt.title('Fig. 2 from Sottek et al (DAGA 2021)', fontsize=15)
 
 # -----------------------------------------------------------------------------
 # Figure 3
-L_AM = np.linspace(50, 90, 50)
+L_AM = np.linspace(50, 90, 150)
 FS_AM_L = fluct_strength_AM_FMtone_L(L_AM)
     
-L_FM = np.linspace(40, 80, 50)
+L_FM = np.linspace(40, 80, 150)
 FS_FM_L = fluct_strength_AM_FMtone_L(L_FM, modulation='FM')
 
-plt.figure()
+plt.figure(3)
 plt.subplot(121)
 plt.plot(L_AM, FS_AM_L)
 plt.grid()
@@ -320,8 +309,8 @@ plt.xticks(ticks=np.linspace(50, 90, 5),
             labels=[f'{x}' for x in np.linspace(50, 90, 5)])
 plt.xlim([50, 90])
 plt.ylim([0, 3.5])
-plt.xlabel(r'$L [dB]$', fontsize=15)
-plt.ylabel(r'$F_{AM}(L) \ / \ F_{AM}(70 dB)$', fontsize=15)
+plt.xlabel(r'$L$ [dB]', fontsize=15)
+plt.ylabel(r'$F_{AM}$($L$) / $F_{AM}$(70 dB)', fontsize=15)
 
 plt.subplot(122)
 plt.plot(L_FM, FS_FM_L)
@@ -330,8 +319,8 @@ plt.xticks(ticks=np.linspace(40, 80, 3),
             labels=[f'{x}' for x in np.linspace(40, 80, 3)])
 plt.xlim([40, 80])
 plt.ylim([0, 3.5])
-plt.xlabel(r'$L [dB]$', fontsize=15)
-plt.ylabel(r'$F_{FM}(L) \ / \ F_{FM}(70 dB)$', fontsize=15)
+plt.xlabel(r'$L$ [dB]', fontsize=15)
+plt.ylabel(r'$F_{FM}$($L$) / $F_{FM}$(70 dB)', fontsize=15)
 
 plt.suptitle('Fig. 3 from Sottek et al (DAGA 2021)', fontsize=15)
 
@@ -342,11 +331,11 @@ plt.tight_layout()
 # Figure 5
 
 # Freq range approximately covers 'delta_z' range from 0 to 6 Bark
-delta_f = np.linspace(0, 675, 101, endpoint=True)
+delta_f = np.linspace(0, 675, 151, endpoint=True)
 
 delta_z1, FS_FM_deltaF = fluct_strength_FMtone_deltaF_fc(fc=1500, delta_f=delta_f)
 
-plt.figure()
+plt.figure(5)
 plt.plot(delta_z1, FS_FM_deltaF)
 plt.grid()
 plt.ylim([0, 2])
@@ -366,7 +355,7 @@ fc = np.linspace(500, 9000, 151, endpoint=True)
 
 delta_z2, FS_FM_fc = fluct_strength_FMtone_deltaF_fc(fc=fc, delta_f=200)
 
-plt.figure()
+plt.figure(6)
 plt.semilogx(fc, FS_FM_fc)
 plt.grid()
 
