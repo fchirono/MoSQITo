@@ -227,7 +227,7 @@ t = np.linspace(0, T-dt, int(T*fs))
 
 force_pass = False
 
-save_fig = False
+save_fig = True
 
 
 # %% Figure 1 from Sottek et al (DAGA 2021)
@@ -300,7 +300,7 @@ else:
 plt.tight_layout()
 
 if save_fig:
-    plt.savefig('Fig1_Sottek_etal_DAGA2021.png')
+    plt.savefig('validation_Fig1_Sottek_etal_DAGA2021.png')
 
 
 # %% Figure 2 from Sottek et al (DAGA 2021)
@@ -374,7 +374,7 @@ else:
 plt.tight_layout()
 
 if save_fig:
-    plt.savefig('Fig2_Sottek_etal_DAGA2021.png')
+    plt.savefig('validation_Fig2_Sottek_etal_DAGA2021.png')
 
 
 # %% Figure 3a from Sottek et al (DAGA 2021)
@@ -447,8 +447,11 @@ else:
              horizontalalignment="center", verticalalignment="center",
              transform=plt.gca().transAxes, bbox=dict(facecolor="red", alpha=0.3))
 
+plt.legend()
 plt.tight_layout()
 
+if save_fig:
+    plt.savefig('validation_Fig3a_Sottek_etal_DAGA2021.png')
 
 # %% Figure 3b from Sottek et al (DAGA 2021)
 
@@ -491,7 +494,7 @@ if force_pass:
 test3b = (FS_FM3b < 1.2*FS_FM_L3b).all() and (FS_FM3b > 0.8*FS_FM_L3b).all()
 
 plt.figure(figsize=(8, 6))
-plt.plot(L_FM3b, FS_FM_L3b, label='Eq. 3 (Sottek et al, DAGA 2021')
+plt.plot(L_FM3b, FS_FM_L3b, label='Eq. 3 (Sottek et al, DAGA 2021)')
 plt.plot(L_FM3b, 0.8*FS_FM_L3b, 'C0--', label='20% tolerance')
 plt.plot(L_FM3b, 1.2*FS_FM_L3b, 'C0--')
 
@@ -517,11 +520,12 @@ else:
              horizontalalignment="center", verticalalignment="center",
              transform=plt.gca().transAxes, bbox=dict(facecolor="red", alpha=0.3))
 
+plt.legend()
 plt.tight_layout()
 
 
 if save_fig:
-    plt.savefig('Fig3_Sottek_etal_DAGA2021.png')
+    plt.savefig('validation_Fig3b_Sottek_etal_DAGA2021.png')
 
     
 # %% Figure 5 from Sottek et al (DAGA 2021)
@@ -595,10 +599,11 @@ else:
              horizontalalignment="center", verticalalignment="center",
              transform=plt.gca().transAxes, bbox=dict(facecolor="red", alpha=0.3))
 
+plt.legend()
 plt.tight_layout()
 
 if save_fig:
-    plt.savefig('Fig5_Sottek_etal_DAGA2021.png')
+    plt.savefig('validation_Fig5_Sottek_etal_DAGA2021.png')
 
     
     
@@ -673,7 +678,8 @@ else:
              horizontalalignment="center", verticalalignment="center",
              transform=plt.gca().transAxes, bbox=dict(facecolor="red", alpha=0.3))
 
+plt.legend()
 plt.tight_layout()
 
 if save_fig:
-    plt.savefig('Fig6_Sottek_etal_DAGA2021.png')
+    plt.savefig('validation_Fig6_Sottek_etal_DAGA2021.png')
