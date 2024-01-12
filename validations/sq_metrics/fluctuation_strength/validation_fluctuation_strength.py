@@ -26,8 +26,7 @@ try:
     import pytest
 except ImportError:
     raise RuntimeError(
-        "In order to perform the tests you need the 'pytest' package."
-        )
+        "In order to perform the tests you need the 'pytest' package.")
 
 
 import numpy as np
@@ -38,7 +37,7 @@ plt.close('all')
 # Local application imports
 from mosqito.sq_metrics import fluctuation_strength
 from mosqito.sq_metrics.fluctuation_strength.utils import (
-    _create_am_sin, _create_am_bbn, _create_fm_sin)
+    _create_am_sin, _create_fm_sin)
 
 
 # %% Global parameters
@@ -281,19 +280,13 @@ plt.title(r'FS as function of $f_m$ (AM tone, 1 kHz, 100% mod. depth)',
           fontsize=14)
 
 if test:
-    plt.text( 0.5, 0.5,
-        "Test passed (20% tolerance not exceeded)",
-        horizontalalignment="center",
-        verticalalignment="center",
-        transform=plt.gca().transAxes,
-        bbox=dict(facecolor="green", alpha=0.3))
+    plt.text( 0.5, 0.5, "Test passed (20% tolerance not exceeded)", fontsize=13,
+        horizontalalignment="center", verticalalignment="center",
+        transform=plt.gca().transAxes, bbox=dict(facecolor="green", alpha=0.3))
 else:
-    plt.text(0.5, 0.5,
-             "Test not passed",
-             horizontalalignment="center",
-             verticalalignment="center",
-             transform=plt.gca().transAxes,
-             bbox=dict(facecolor="red", alpha=0.3))
+    plt.text(0.5, 0.5, "Test not passed", fontsize=13,
+             horizontalalignment="center", verticalalignment="center",
+             transform=plt.gca().transAxes, bbox=dict(facecolor="red", alpha=0.3))
 
 plt.tight_layout()
 
@@ -353,19 +346,13 @@ plt.title(r'FS as function of $f_m$ (FM tone, 1.5 kHz, 700 Hz freq deviation)',
 
 
 if test2:
-    plt.text( 0.5, 0.5,
-        "Test passed (20% tolerance not exceeded)",
-        horizontalalignment="center",
-        verticalalignment="center",
-        transform=plt.gca().transAxes,
-        bbox=dict(facecolor="green", alpha=0.3))
+    plt.text( 0.5, 0.5, "Test passed (20% tolerance not exceeded)", fontsize=13,
+        horizontalalignment="center", verticalalignment="center",
+        transform=plt.gca().transAxes, bbox=dict(facecolor="green", alpha=0.3))
 else:
-    plt.text(0.5, 0.5,
-             "Test not passed",
-             horizontalalignment="center",
-             verticalalignment="center",
-             transform=plt.gca().transAxes,
-             bbox=dict(facecolor="red", alpha=0.3))
+    plt.text(0.5, 0.5, "Test not passed", fontsize=13,
+             horizontalalignment="center", verticalalignment="center",
+             transform=plt.gca().transAxes, bbox=dict(facecolor="red", alpha=0.3))
 
 plt.tight_layout()
 
@@ -375,15 +362,46 @@ if save_fig:
 
 # %% Figure 3 from Sottek et al (DAGA 2021)
 
-L_AM = np.linspace(50, 90, 150)
-FS_AM_L = fluct_strength_AM_FMtone_L(L_AM)
-    
-L_FM = np.linspace(40, 80, 150)
-FS_FM_L = fluct_strength_AM_FMtone_L(L_FM, modulation='FM')
+# ----------------------------------------------------------------------------
+# Part (a): AM tones
 
-plt.figure(3)
-plt.subplot(121)
-plt.plot(L_AM, FS_AM_L)
+# Test parameters for AM tone:
+fc3 = 1000   # carrier frequency, Hz
+fm3 = 4      # modulation frequency [Hz]
+
+# 40 dB (100%) modulation strength - modulating signal has unitary amplitude
+
+N_test3 = 64
+FS_AM3 = np.zeros(N_test3)
+
+# range of levels, in dB SPL
+L_AM = np.linspace(50, 90, N_test3)
+
+# evaluate FS for various AM tones
+for i, l in enumerate(L_AM):
+    xm3 = np.sin(2*np.pi*fm3*t)
+    x3 = _create_am_sin(l, fc3, xm3, fs)
+    FS_AM3[i] = fluctuation_strength(x3, fs)
+
+# normalise to FS of reference tone (70 dB)
+xm_ref3 = np.sin(2*np.pi*4*t)
+x_ref3 = _create_am_sin(70, fc3, xm_ref3, fs)
+FS_AM3 *= 1/fluctuation_strength(x_ref3, fs)
+
+FS_AM_L = fluct_strength_AM_FMtone_L(L_AM)
+
+# test for 20% tolerance
+test3 = (FS_AM3 < 1.2*FS_AM_L).all() and (FS_AM3 > 0.8*FS_AM_L).all()
+
+    
+plt.figure('3a', figsize=(8, 6))
+
+plt.plot(L_AM, FS_AM_L, label='Eq. 3 (Sottek et al (DAGA 2021)')
+plt.plot(L_AM, 0.8*FS_AM_L, 'C0--', label='20% tolerance')
+plt.plot(L_AM, 1.2*FS_AM_L, 'C0--')
+
+plt.semilogx(L_AM, FS_FM, 'C1*:', label='MoSQITo implementation')
+
 plt.grid()
 plt.xticks(ticks=np.linspace(50, 90, 5),
             labels=[f'{x}' for x in np.linspace(50, 90, 5)])
@@ -392,8 +410,60 @@ plt.ylim([0, 3.5])
 plt.xlabel(r'$L$ [dB]', fontsize=15)
 plt.ylabel(r'$F_{AM}$($L$) / $F_{AM}$(70 dB)', fontsize=15)
 
-plt.subplot(122)
-plt.plot(L_FM, FS_FM_L)
+plt.title(r'FS as function of $L$ (AM tone, 1 kHz, 100% mod. depth)',
+          fontsize=14)
+
+if test3:
+    plt.text( 0.5, 0.5, "Test passed (20% tolerance not exceeded)", fontsize=13,
+        horizontalalignment="center", verticalalignment="center",
+        transform=plt.gca().transAxes, bbox=dict(facecolor="green", alpha=0.3))
+else:
+    plt.text(0.5, 0.5, "Test not passed", fontsize=13,
+             horizontalalignment="center", verticalalignment="center",
+             transform=plt.gca().transAxes, bbox=dict(facecolor="red", alpha=0.3))
+
+plt.tight_layout()
+
+
+# ----------------------------------------------------------------------------
+# Part (b): FM tone
+
+
+# Test parameters for FM tone:
+fc3b = 1500         # carrier frequency, Hz
+fm3b = 4            # modulation frequency [Hz]
+delta_f3b = 700     # frequency deviation
+
+N_test3b = 64
+FS_FM3b = np.zeros(N_test3b)
+
+# range of levels, in dB SPL
+L_FM3 = np.linspace(40, 80, N_test3)
+
+# evaluate FS for various AM tones
+for i, l in enumerate(L_FM3):
+    xm3b = np.sin(2*np.pi*fm3b*t)
+    x3b = _create_fm_sin(l, fc3b, xm3b, delta_f3b, fs)
+    FS_FM3b[i] = fluctuation_strength(x3b, fs)
+
+# normalise to FS of reference tone (70 dB)
+xm_ref3b = np.sin(2*np.pi*4*t)
+x_ref3b = _create_fm_sin(70, fc3b, xm_ref3b, delta_f3b, fs)
+FS_FM3b *= 1/fluctuation_strength(x_ref3b, fs)
+
+FS_FM_L = fluct_strength_AM_FMtone_L(L_FM3, modulation='FM')
+
+
+# test for 20% tolerance
+test3b = (FS_FM3b < 1.2*FS_FM_L).all() and (FS_FM3b > 0.8*FS_FM_L).all()
+
+plt.figure('3b', figsize=(8, 6))
+plt.plot(L_FM3, FS_FM_L, label='Eq. 3 (Sottek et al, DAGA 2021')
+plt.plot(L_FM3, 0.8*FS_FM_L, 'C0--', label='20% tolerance')
+plt.plot(L_FM3, 1.2*FS_FM_L, 'C0--')
+
+plt.plot(L_FM3, FS_FM3b, 'C1*:', label='MoSQITo implementation')
+
 plt.grid()
 plt.xticks(ticks=np.linspace(40, 80, 3),
             labels=[f'{x}' for x in np.linspace(40, 80, 3)])
@@ -402,57 +472,158 @@ plt.ylim([0, 3.5])
 plt.xlabel(r'$L$ [dB]', fontsize=15)
 plt.ylabel(r'$F_{FM}$($L$) / $F_{FM}$(70 dB)', fontsize=15)
 
-plt.suptitle('Fig. 3 from Sottek et al (DAGA 2021)', fontsize=15)
+plt.title(r'FS as function of $L$ (FM tone, 1.5 kHz, 700 Hz freq. deviation)',
+          fontsize=14)
+
+if test3b:
+    plt.text( 0.5, 0.5, "Test passed (20% tolerance not exceeded)", fontsize=13,
+        horizontalalignment="center", verticalalignment="center",
+        transform=plt.gca().transAxes, bbox=dict(facecolor="green", alpha=0.3))
+else:
+    plt.text(0.5, 0.5, "Test not passed", fontsize=13,
+             horizontalalignment="center", verticalalignment="center",
+             transform=plt.gca().transAxes, bbox=dict(facecolor="red", alpha=0.3))
 
 plt.tight_layout()
+
 
 if save_fig:
     plt.savefig('Fig3_Sottek_etal_DAGA2021.png')
     
+    
 # %% Figure 5 from Sottek et al (DAGA 2021)
+# --> modulation frequency 'fm' is unclear from paper! Assuming 'fm' = 4 Hz
 
-# Freq range approximately covers 'delta_z' range from 0 to 6 Bark
-delta_f = np.linspace(0, 675, 151, endpoint=True)
+# Test parameters for FM tone:
+L_FM5 = 70          # tone level, dB SPL
+fc5 = 1500          # carrier frequency, Hz
+fm5 = 4             # modulation frequency [Hz]
 
-delta_z1, FS_FM_deltaF = fluct_strength_FMtone_deltaF_fc(fc=1500, delta_f=delta_f)
 
-plt.figure(5)
-plt.plot(delta_z1, FS_FM_deltaF)
+# Freq. range approximately covers 'delta_z' range from 0 to 6 Bark
+N_test5 = 151
+delta_f5 = np.linspace(0, 675, N_test5, endpoint=True)
+
+FS_FM5 = np.zeros(N_test5)
+
+# evaluate FS for various FM tones
+for i, d in enumerate(delta_f5):
+    xm5 = np.sin(2*np.pi*fm5*t)
+    x5 = _create_fm_sin(l, fc5, xm5, d, fs)
+    FS_FM5[i] = fluctuation_strength(x5, fs)
+
+# normalise to FS of reference tone (70 dB)
+xm_ref5 = np.sin(2*np.pi*4*t)
+x_ref5 = _create_fm_sin(L_FM5, fc3b, xm_ref5, 200, fs)
+FS_FM5 *= 1/fluctuation_strength(x_ref5, fs)
+
+
+delta_z1, FS_FM_deltaF = fluct_strength_FMtone_deltaF_fc(fc=fc5, delta_f=delta_f5)
+
+# test for 20% tolerance
+test5 = (FS_FM3b < 1.2*FS_FM_L).all() and (FS_FM3b > 0.8*FS_FM_L).all()
+
+
+plt.figure(5, figsize=(8, 6))
+plt.plot(delta_z1, FS_FM_deltaF, label='Eq. 4 (Sottek et al, DAGA 2021)')
+plt.plot(delta_z1, 0.8*FS_FM_deltaF, 'C0--', label='20% tolerance')
+plt.plot(delta_z1, 1.2*FS_FM_deltaF, 'C0--')
+
+plt.plot(delta_z1, FS_FM5, 'C1*:', label='MoSQITo implementation')
+
 plt.grid()
 plt.ylim([0, 2])
 plt.xlabel(r'Freq deviation $\Delta z$ [Bark$_{HMS}$] (for fixed $f_c$=1500 Hz)',
             fontsize=13)
 plt.ylabel(r'$F_{BW}$($\Delta$z) / $F_{BW, ref}$', fontsize=15)
-plt.title(r'Fig. 5 from Sottek et al, DAGA 2021',
-          fontsize=14)
+
 plt.text(1., 0.25, r'*$F_{BW, ref} = F_{BW}( f_c$=1500 Hz, $\Delta f$ = 200 Hz)',
           fontsize=14)
+
+plt.title(r'FS as function of $\Delta f$ (FM tone, 1.5 kHz, 200 Hz freq. deviation, $f_m$=?)',
+          fontsize=14)
+
+if test5:
+    plt.text( 0.5, 0.5, "Test passed (20% tolerance not exceeded)", fontsize=13,
+        horizontalalignment="center", verticalalignment="center",
+        transform=plt.gca().transAxes, bbox=dict(facecolor="green", alpha=0.3))
+else:
+    plt.text(0.5, 0.5, "Test not passed", fontsize=13,
+             horizontalalignment="center", verticalalignment="center",
+             transform=plt.gca().transAxes, bbox=dict(facecolor="red", alpha=0.3))
+
+plt.tight_layout()
 
 if save_fig:
     plt.savefig('Fig5_Sottek_etal_DAGA2021.png')
     
+    
 # %% Figure 6 from Sottek et al (DAGA 2021)
+# --> modulation frequency 'fm' is unclear from paper! Assuming 'fm' = 4 Hz
 
-fc = np.linspace(500, 9000, 151, endpoint=True)
+# Test parameters for FM tone:
+L_FM6 = 70          # tone level, dB SPL
+delta_f6 = 200      # frequency deviation, Hz
+fm6 = 4             # modulation frequency [Hz]
 
-delta_z2, FS_FM_fc = fluct_strength_FMtone_deltaF_fc(fc=fc, delta_f=200)
+N_test6 = 151
+fc6 = np.linspace(500, 9000, N_test6, endpoint=True)
 
-plt.figure(6)
-plt.semilogx(fc, FS_FM_fc)
+FS_FM6 = np.zeros(N_test6)
+
+# evaluate FS for various FM tones
+for i, f in enumerate(fc6):
+    xm6 = np.sin(2*np.pi*fm6*t)
+    x6 = _create_fm_sin(L_FM6, f, xm6, delta_f6, fs)
+    FS_FM6[i] = fluctuation_strength(x6, fs)
+
+# normalise to FS of reference tone (1.5 kHz)
+xm_ref6 = np.sin(2*np.pi*4*t)
+x_ref6 = _create_fm_sin(L_FM6, 1500, xm_ref6, delta_f6, fs)
+FS_FM6 *= 1/fluctuation_strength(x_ref6, fs)
+
+
+delta_z6, FS_FM_fc = fluct_strength_FMtone_deltaF_fc(fc=fc6, delta_f=delta_f6)
+
+# test for 20% tolerance
+test6 = (FS_FM6 < 1.2*FS_FM_fc).all() and (FS_FM6 > 0.8*FS_FM_fc).all()
+
+
+plt.figure(6, figsize=(8, 6))
+plt.plot(fc6, FS_FM_fc, label='Eq. 4 (Sottek et al, DAGA 2021)')
+plt.plot(fc6, 0.8*FS_FM_fc, 'C0--', label='20% tolerance')
+plt.plot(fc6, 1.2*FS_FM_fc, 'C0--')
+
+plt.plot(fc6, FS_FM6, 'C1*:', label='MoSQITo implementation')
+
 plt.grid()
-
 plt.xlim([500, 8000])
 plt.ylim([0, 2])
 
 plt.xticks(ticks=np.array([500, 1500, 4500, 8000]),
             labels=['0.5', '1.5', '4.5', '8'])
-plt.xlabel(r'Carrier freq $f_c$ [kHz] (for fixed $\Delta f$=200 Hz)',
+plt.xlabel(r'Carrier frequency $f_c$ [kHz] (for fixed $\Delta f$=200 Hz)',
             fontsize=13)
 plt.ylabel(r'$F_{CF}$($f_c$) / $F_{CF, ref}$', fontsize=15)
-plt.title(r'Fig. 6 from Sottek et al, DAGA 2021',
-          fontsize=14)
+
 plt.text(650, 1.75, r'*$F_{CF, ref} = F_{CF}( f_c$=1500 Hz, $\Delta f$ = 200 Hz)',
           fontsize=14)
 
+plt.title(r'FS as function of $f_c$ (FM tone, 200 Hz freq. deviation, $f_m$=?)',
+          fontsize=14)
+
+if test6:
+    plt.text( 0.5, 0.5, "Test passed (20% tolerance not exceeded)", fontsize=13,
+        horizontalalignment="center", verticalalignment="center",
+        transform=plt.gca().transAxes, bbox=dict(facecolor="green", alpha=0.3))
+else:
+    plt.text(0.5, 0.5, "Test not passed", fontsize=13,
+             horizontalalignment="center", verticalalignment="center",
+             transform=plt.gca().transAxes, bbox=dict(facecolor="red", alpha=0.3))
+
+plt.tight_layout()
+
 if save_fig:
     plt.savefig('Fig6_Sottek_etal_DAGA2021.png')
+    
+
