@@ -479,8 +479,8 @@ def test3a():
     plt.xlabel(r'$L$ [dB]', fontsize=15)
     plt.ylabel(r'$F_{AM}$($L$) / $F_{AM}$(70 dB)', fontsize=15)
     
-    plt.title(r'FS as function of $L$ (AM tone, $f_c$ = 1 kHz, $f_m$ = 4 Hz, 100% mod. depth)',
-              fontsize=14)
+    plt.title(r'FS as function of $L$ (AM tone, $f_c$=1 kHz, $f_m$=4 Hz, 100% mod. depth)',
+              fontsize=13)
     
     if test3a:
         plt.text( 0.5, 0.5, "Test passed (20% tolerance not exceeded)", fontsize=13,
@@ -554,8 +554,8 @@ def test3b():
     plt.xlabel(r'$L$ [dB]', fontsize=15)
     plt.ylabel(r'$F_{FM}$($L$) / $F_{FM}$(70 dB)', fontsize=15)
     
-    plt.title(r'FS as function of $L$ (FM tone, $f_c$=1.5 kHz, $\Delta f$=700 Hz)',
-              fontsize=14)
+    plt.title(r'FS as function of $L$ (FM tone, $f_c$=1.5 kHz, $\Delta f$=700 Hz, $f_m$=4 Hz)',
+              fontsize=13)
     
     if test3b:
         plt.text( 0.5, 0.5, "Test passed (20% tolerance not exceeded)", fontsize=13,
@@ -585,7 +585,6 @@ def test5():
     L_FM5 = 70          # tone level, dB SPL
     fc5 = 1500          # carrier frequency, Hz
     fm5 = 4             # modulation frequency [Hz]
-    
     
     # Freq. range approximately covers 'delta_z' range from just above 0 to 6 Bark
     N_test5 = 75
@@ -634,11 +633,11 @@ def test5():
                 fontsize=13)
     plt.ylabel(r'$F_{BW}$($\Delta$z) / $F_{BW, ref}$', fontsize=15)
     
-    plt.text(1., 0.25, r'*$F_{BW, ref} = F_{BW}( f_c$=1500 Hz, $\Delta f$ = 200 Hz)',
+    plt.text(1., 0.25, r'*$F_{BW, ref} = F_{BW}(\Delta f$ = 200 Hz)',
               fontsize=14)
     
-    plt.title(r'FS as function of $\Delta f$ (FM tone, 1.5 kHz, 200 Hz freq. deviation, $f_m$=?)',
-              fontsize=14)
+    plt.title(r'FS as function of $\Delta f$ (FM tone, $L$=70 dB, $f_c$=1.5 kHz, $f_m$=4 Hz)',
+              fontsize=13)
     
     if test5:
         plt.text( 0.5, 0.5, "Test passed (20% tolerance not exceeded)", fontsize=13,
@@ -716,11 +715,11 @@ def test6():
                 fontsize=13)
     plt.ylabel(r'$F_{CF}$($f_c$) / $F_{CF, ref}$', fontsize=15)
     
-    plt.text(650, 1.75, r'*$F_{CF, ref} = F_{CF}( f_c$=1500 Hz, $\Delta f$ = 200 Hz)',
+    plt.text(650, 1.75, r'*$F_{CF, ref} = F_{CF}( f_c$=1500 Hz)',
               fontsize=14)
     
-    plt.title(r'FS as function of $f_c$ (FM tone, 200 Hz freq. deviation, $f_m$=?)',
-              fontsize=14)
+    plt.title(r'FS as function of $f_c$ (FM tone, $L$=70 dB, $f_m$=4 Hz, $\Delta f$=200 Hz)',
+              fontsize=13)
     
     if test6:
         plt.text( 0.5, 0.5, "Test passed (20% tolerance not exceeded)", fontsize=13,
