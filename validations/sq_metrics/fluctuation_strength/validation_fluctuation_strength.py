@@ -2,10 +2,10 @@
 """
 Validation for Fluctuation Strength implementation
 
-This code uses expressions for the perceived fluctuation strength of synthetic,
-stationary amplitude-modulated (AM) or frequency-modulated (FM) sounds. These
-values were obtained via jury tests, and their dependency on each signal
-parameter was approximated by analytical expressions by Sottek et al [2].
+This code assesses the Fluctuation Strength of synthetic, stationary
+amplitude-modulated (AM) or frequency-modulated (FM) sounds, and compares them
+to perceived values obtained via jury tests and approximated by analytical
+expressions by Sottek et al [2].
 
 Author:
     Fabio Casagrande Hirono
@@ -41,10 +41,18 @@ from mosqito.sq_metrics.fluctuation_strength.utils import (
     _create_am_sin, _create_am_bbn, _create_fm_sin)
 
 
+# %% Global parameters
+
+fs = 48000
+dt = 1/fs
+
+T = 1.5
+t = np.linspace(0, T-dt, int(T*fs))
+
 save_fig = False
 
-# %% Equations from Sottek et al (DAGA 2021)
 
+# %% Equations from Sottek et al (DAGA 2021)
 
 def fluct_strength_AMtone_fm(fm):
     """ This equation (Eq. 1 from Sottek et al [2]) models the effect
@@ -220,35 +228,119 @@ def fluct_strength_FMtone_deltaF_fc(fc, delta_f):
     return np.squeeze(delta_z), np.squeeze(FS_freq_dev_norm)
 
 
-# %% Plot the figures from Sottek et al (DAGA 2021)
+# %% Figure 1 from Sottek et al (DAGA 2021)
 
 
-# -----------------------------------------------------------------------------
-# Figure 1
-fm = np.logspace(-2, 5, 128, base=2)
+# Test parameters for AM tone:
+Lp = 70     # Level, dB SPL
+fc = 1000   # carrier frequency, Hz
 
+# 40 dB (100%) modulation strength - modulating signal has unitary amplitude
+
+
+# varying modulation frequency
+N_test1 = 64
+fm = np.logspace(-2, 5, N_test1, base=2)
+
+FS_AM = np.zeros(N_test1)
+
+# evaluate FS for various AM tones
+for i, f in enumerate(fm):
+    xm = np.sin(2*np.pi*f*t)
+    x = _create_am_sin(Lp, fc, xm, fs)
+    FS_AM[i] = fluctuation_strength(x, fs)
+
+# normalise to FS of reference tone (8 Hz modulation rate)
+xm_ref = np.sin(2*np.pi*8*t)
+x_ref = _create_am_sin(Lp, fc, xm_ref, fs)
+FS_AM *= 1/fluctuation_strength(x_ref, fs)
+
+# analytical expression from Sottek et al (DAGA 2021)
 FS_AM_fm = fluct_strength_AMtone_fm(fm)/fluct_strength_AMtone_fm(8)
 
-plt.figure(1)
-plt.semilogx(fm, FS_AM_fm)
+# test for 20% tolerance
+test = (FS_AM < 1.2*FS_AM_fm).all() and (FS_AM > 0.8*FS_AM_fm).all()
+
+        
+plt.figure(1, figsize=(8, 6))
+plt.semilogx(fm, FS_AM_fm, label='Eq. 1 (Sottek et al, DAGA 2021)')
+plt.semilogx(fm, 0.8*FS_AM_fm, 'C0--', label='20% tolerance')
+plt.semilogx(fm, 1.2*FS_AM_fm, 'C0--')
+
+plt.semilogx(fm, FS_AM, 'C1*:', label='MoSQITo implementation')
+
 plt.grid()
 plt.xticks(ticks = np.logspace(-2, 5, 8, base=2),
             labels = [f'{x:.02f}' for x in np.logspace(-2, 5, 8, base=2)])
 plt.xlim([0.25, 32])
-plt.ylim([0, 1.2])
+plt.ylim([0, 1.4])
+plt.legend()
 plt.xlabel(r'$f_m$ [Hz]', fontsize=15)
 plt.ylabel(r'$F_{AM}$($f_m$) / $F_{AM}$(8 Hz)', fontsize=15)
-plt.title('Fig. 1 from Sottek et al (DAGA 2021)', fontsize=15)
+plt.title(r'FS as function of $f_m$ (AM tone, 1 kHz, 100% mod. depth)',
+          fontsize=14)
+
+if test:
+    plt.text( 0.5, 0.5,
+        "Test passed (20% tolerance not exceeded)",
+        horizontalalignment="center",
+        verticalalignment="center",
+        transform=plt.gca().transAxes,
+        bbox=dict(facecolor="green", alpha=0.3))
+else:
+    plt.text(0.5, 0.5,
+             "Test not passed",
+             horizontalalignment="center",
+             verticalalignment="center",
+             transform=plt.gca().transAxes,
+             bbox=dict(facecolor="red", alpha=0.3))
+
+plt.tight_layout()
 
 if save_fig:
     plt.savefig('Fig1_Sottek_etal_DAGA2021.png')
 
-# -----------------------------------------------------------------------------
-# Figure 2
+
+# %% Figure 2 from Sottek et al (DAGA 2021)
+
+
+# Test parameters for FM tone:
+Lp2 = 70     # Level, dB SPL
+fc2 = 1500   # carrier frequency, Hz
+
+delta_f2 = 700   # freq deviation, Hz
+
+# varying modulation frequency
+N_test2 = 64
+fm2 = np.logspace(-2, 5, N_test2, base=2)
+
+FS_FM = np.zeros(N_test2)
+
+# evaluate FS for various FM tones
+for i, f in enumerate(fm2):
+    xm2 = np.sin(2*np.pi*f*t)
+    x2 = _create_fm_sin(Lp2, fc2, xm2, delta_f2, fs)
+    FS_FM[i] = fluctuation_strength(x2, fs)
+
+# normalise to FS of reference tone (4 Hz modulation rate)
+xm_ref2 = np.sin(2*np.pi*4*t)
+x_ref2 = _create_fm_sin(Lp2, fc2, xm_ref2, delta_f2, fs)
+FS_AM *= 1/fluctuation_strength(x_ref2, fs)
+
+# analytical expression from Sottek et al (DAGA 2021)
 FS_FM_fm = fluct_strength_FMtone_fm(fm)/fluct_strength_FMtone_fm(4)
 
-plt.figure(2)
-plt.semilogx(fm, FS_FM_fm)
+# test for 20% tolerance
+test2 = (FS_FM < 1.2*FS_FM_fm).all() and (FS_FM > 0.8*FS_FM_fm).all()
+
+
+plt.figure(2, figsize=(8, 6))
+plt.semilogx(fm, FS_FM_fm, label='Eq. 2 (Sottek et al, DAGA 2021)')
+plt.semilogx(fm, 0.8*FS_FM_fm, 'C0--', label='20% tolerance')
+plt.semilogx(fm, 1.2*FS_FM_fm, 'C0--')
+
+plt.semilogx(fm, FS_FM, 'C1*:', label='MoSQITo implementation')
+
 plt.grid()
 plt.xticks(ticks=np.logspace(-2, 5, 8, base=2),
             labels=[f'{x:.02f}' for x in np.logspace(-2, 5, 8, base=2)])
@@ -256,13 +348,33 @@ plt.xlim([0.25, 32])
 plt.ylim([0, 1.2])
 plt.xlabel(r'$f_m$ [Hz]', fontsize=15)
 plt.ylabel(r'$F_{FM}$($f_m$) / $F_{FM}$(4 Hz)', fontsize=15)
-plt.title('Fig. 2 from Sottek et al (DAGA 2021)', fontsize=15)
+plt.title(r'FS as function of $f_m$ (FM tone, 1.5 kHz, 700 Hz freq deviation)',
+          fontsize=14)
+
+
+if test2:
+    plt.text( 0.5, 0.5,
+        "Test passed (20% tolerance not exceeded)",
+        horizontalalignment="center",
+        verticalalignment="center",
+        transform=plt.gca().transAxes,
+        bbox=dict(facecolor="green", alpha=0.3))
+else:
+    plt.text(0.5, 0.5,
+             "Test not passed",
+             horizontalalignment="center",
+             verticalalignment="center",
+             transform=plt.gca().transAxes,
+             bbox=dict(facecolor="red", alpha=0.3))
+
+plt.tight_layout()
 
 if save_fig:
     plt.savefig('Fig2_Sottek_etal_DAGA2021.png')
 
-# -----------------------------------------------------------------------------
-# Figure 3
+
+# %% Figure 3 from Sottek et al (DAGA 2021)
+
 L_AM = np.linspace(50, 90, 150)
 FS_AM_L = fluct_strength_AM_FMtone_L(L_AM)
     
@@ -297,8 +409,7 @@ plt.tight_layout()
 if save_fig:
     plt.savefig('Fig3_Sottek_etal_DAGA2021.png')
     
-# -----------------------------------------------------------------------------
-# Figure 5
+# %% Figure 5 from Sottek et al (DAGA 2021)
 
 # Freq range approximately covers 'delta_z' range from 0 to 6 Bark
 delta_f = np.linspace(0, 675, 151, endpoint=True)
@@ -320,8 +431,7 @@ plt.text(1., 0.25, r'*$F_{BW, ref} = F_{BW}( f_c$=1500 Hz, $\Delta f$ = 200 Hz)'
 if save_fig:
     plt.savefig('Fig5_Sottek_etal_DAGA2021.png')
     
-# -----------------------------------------------------------------------------
-# Figure 6
+# %% Figure 6 from Sottek et al (DAGA 2021)
 
 fc = np.linspace(500, 9000, 151, endpoint=True)
 
