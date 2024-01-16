@@ -297,15 +297,14 @@ def test1():
     x_ref1 = _create_am_sin(Lp1, fc1, xm_ref1, fs)
     FS_AM1 *= 1/fluctuation_strength(x_ref1, fs)
     
+    # test for 20% tolerance
+    test1 = (FS_AM1 < 1.2*FS_AM_fm1).all() and (FS_AM1 > 0.8*FS_AM_fm1).all()
+    
     # ------------------------------------------------------------------------
     # force test to pass
     if force_pass:
-        FS_AM1 = np.copy(FS_AM_fm1)
-    
+        test1 = True
     # ------------------------------------------------------------------------
-    
-    # test for 20% tolerance
-    test1 = (FS_AM1 < 1.2*FS_AM_fm1).all() and (FS_AM1 > 0.8*FS_AM_fm1).all()
     
     # plot Figure 1
     plt.figure(figsize=(8, 6))
@@ -378,15 +377,14 @@ def test2():
     x_ref2 = _create_fm_sin(Lp2, fc2, xm_ref2, delta_f2, fs)
     FS_FM2 *= 1/fluctuation_strength(x_ref2, fs)
 
+    # test for 20% tolerance
+    test2 = (FS_FM2 < 1.2*FS_FM_fm2).all() and (FS_FM2 > 0.8*FS_FM_fm2).all()    
+    
     # ------------------------------------------------------------------------
     # force test to pass
     if force_pass:
-        FS_FM2 = np.copy(FS_FM_fm2)
-    
+        test2 = True
     # ------------------------------------------------------------------------
-
-    # test for 20% tolerance
-    test2 = (FS_FM2 < 1.2*FS_FM_fm2).all() and (FS_FM2 > 0.8*FS_FM_fm2).all()    
     
     plt.figure(figsize=(8, 6))
     plt.semilogx(fm2, FS_FM_fm2, label='Eq. 2 (Sottek et al, DAGA 2021)')
@@ -461,17 +459,14 @@ def test3a():
     x_ref3a = _create_am_sin(70, fc3a, xm_ref3a, fs)
     FS_AM3a *= 1/fluctuation_strength(x_ref3a, fs)
     
-    # ------------------------------------------------------------------------
-    # force test to pass
-    if force_pass:
-        FS_AM3a = np.copy(FS_AM_L3a)
-    
-    # ------------------------------------------------------------------------
-    
-    
     # test for 20% tolerance
     test3a = (FS_AM3a < 1.2*FS_AM_L3a).all() and (FS_AM3a > 0.8*FS_AM_L3a).all()
     
+    # ------------------------------------------------------------------------
+    # force test to pass
+    if force_pass:
+        test3a = True
+    # ------------------------------------------------------------------------
         
     plt.figure(figsize=(8, 6))
     
@@ -541,16 +536,14 @@ def test3b():
     x_ref3b = _create_fm_sin(70, fc3b, xm_ref3b, delta_f3b, fs)
     FS_FM3b *= 1/fluctuation_strength(x_ref3b, fs)
     
+    # test for 20% tolerance
+    test3b = (FS_FM3b < 1.2*FS_FM_L3b).all() and (FS_FM3b > 0.8*FS_FM_L3b).all()
+    
     # ------------------------------------------------------------------------
     # force test to pass
     if force_pass:
-        FS_FM3b = np.copy(FS_FM_L3b)
-    
+        test3b = True
     # ------------------------------------------------------------------------
-    
-    
-    # test for 20% tolerance
-    test3b = (FS_FM3b < 1.2*FS_FM_L3b).all() and (FS_FM3b > 0.8*FS_FM_L3b).all()
     
     plt.figure(figsize=(8, 6))
     plt.plot(L_FM3b, FS_FM_L3b, label='Eq. 3 (Sottek et al, DAGA 2021')
@@ -625,17 +618,15 @@ def test5():
     x_ref5 = _create_fm_sin(L_FM5, fc5, xm_ref5, 200, fs)
     FS_FM5 *= 1/fluctuation_strength(x_ref5, fs)
   
+    # test for 20% tolerance
+    test5 = (FS_FM5 < 1.2*FS_FM_deltaF).all() and (FS_FM5 > 0.8*FS_FM_deltaF).all()
+      
     # ------------------------------------------------------------------------
     # force test to pass
     if force_pass:
-        FS_FM5 = np.copy(FS_FM_deltaF)
-    
-    # ------------------------------------------------------------------------
-    
-    # test for 20% tolerance
-    test5 = (FS_FM5 < 1.2*FS_FM_deltaF).all() and (FS_FM5 > 0.8*FS_FM_deltaF).all()
-    
-    
+        test5 = True
+    # ------------------------------------------------------------------------  
+  
     plt.figure(figsize=(8, 6))
     plt.plot(delta_z1, FS_FM_deltaF, label='Eq. 4 (Sottek et al, DAGA 2021)')
     plt.plot(delta_z1, 0.8*FS_FM_deltaF, 'C0--', label='20% tolerance')
@@ -706,16 +697,14 @@ def test6():
     x_ref6 = _create_fm_sin(L_FM6, 1500, xm_ref6, delta_f6, fs)
     FS_FM6 *= 1/fluctuation_strength(x_ref6, fs)
     
-    # ------------------------------------------------------------------------
-    # force test to pass
-    if force_pass:
-        FS_FM6 = np.copy(FS_FM_fc)
-    
-    # ------------------------------------------------------------------------
-    
     # test for 20% tolerance
     test6 = (FS_FM6 < 1.2*FS_FM_fc).all() and (FS_FM6 > 0.8*FS_FM_fc).all()
     
+    # ------------------------------------------------------------------------
+    # force test to pass
+    if force_pass:
+        test6 = True
+    # ------------------------------------------------------------------------
     
     plt.figure(figsize=(8, 6))
     plt.plot(fc6, FS_FM_fc, label='Eq. 4 (Sottek et al, DAGA 2021)')
