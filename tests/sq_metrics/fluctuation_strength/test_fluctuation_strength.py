@@ -257,7 +257,7 @@ dt = 1/fs
 T = 1.5
 t = np.linspace(0, T-dt, int(T*fs))
 
-force_pass = False
+force_pass = True
 
 save_fig = False
 
@@ -266,6 +266,8 @@ save_fig = False
 
 @pytest.mark.fluctuation_strength  # to skip or run only fluctuation strength tests
 def test1():
+    
+    print('Test 1:\n\tRunning...')
     
     # Test parameters for AM tone:
     Lp1 = 70     # Level, dB SPL
@@ -305,6 +307,8 @@ def test1():
     if force_pass:
         test1 = True
     # ------------------------------------------------------------------------
+    
+    print('\tDone!')
     
     # plot Figure 1
     plt.figure(figsize=(8, 6))
@@ -347,6 +351,8 @@ def test1():
 @pytest.mark.fluctuation_strength  # to skip or run only fluctuation strength tests
 def test2():
     
+    print('Test 2:\n\tRunning...')
+    
     # Test parameters for FM tone:
     Lp2 = 70     # Level, dB SPL
     fc2 = 1500   # carrier frequency, Hz
@@ -385,6 +391,8 @@ def test2():
     if force_pass:
         test2 = True
     # ------------------------------------------------------------------------
+    
+    print('\tDone!')
     
     plt.figure(figsize=(8, 6))
     plt.semilogx(fm2, FS_FM_fm2, label='Eq. 2 (Sottek et al, DAGA 2021)')
@@ -427,6 +435,8 @@ def test2():
 @pytest.mark.fluctuation_strength  # to skip or run only fluctuation strength tests
 def test3a():
     
+    print('Test 3a:\n\tRunning...')
+    
     # Test parameters for AM tone:
     fc3a = 1000   # carrier frequency, Hz
     fm3a = 4      # modulation frequency [Hz]
@@ -468,6 +478,8 @@ def test3a():
         test3a = True
     # ------------------------------------------------------------------------
         
+    print('\tDone!')
+    
     plt.figure(figsize=(8, 6))
     
     plt.plot(L_AM3a, FS_AM_L3a, label='Eq. 3 (Sottek et al (DAGA 2021)')
@@ -505,6 +517,8 @@ def test3a():
 
 @pytest.mark.fluctuation_strength  # to skip or run only fluctuation strength tests
 def test3b():
+    
+    print('Test 3b:\n\tRunning...')
     
     # Test parameters for FM tone:
     fc3b = 1500         # carrier frequency, Hz
@@ -544,6 +558,8 @@ def test3b():
     if force_pass:
         test3b = True
     # ------------------------------------------------------------------------
+    
+    print('\tDone!')
     
     plt.figure(figsize=(8, 6))
     plt.plot(L_FM3b, FS_FM_L3b, label='Eq. 3 (Sottek et al, DAGA 2021')
@@ -587,6 +603,8 @@ def test3b():
 @pytest.mark.fluctuation_strength  # to skip or run only fluctuation strength tests
 def test5():
     
+    print('Test 5:\n\tRunning...')
+    
     # Test parameters for FM tone:
     L_FM5 = 70          # tone level, dB SPL
     fc5 = 1500          # carrier frequency, Hz
@@ -626,6 +644,8 @@ def test5():
     if force_pass:
         test5 = True
     # ------------------------------------------------------------------------  
+  
+    print('\tDone!')
   
     plt.figure(figsize=(8, 6))
     plt.plot(delta_z1, FS_FM_deltaF, label='Eq. 4 (Sottek et al, DAGA 2021)')
@@ -669,6 +689,8 @@ def test5():
 @pytest.mark.fluctuation_strength  # to skip or run only fluctuation strength tests
 def test6():
     
+    print('Test 6:\n\tRunning...')
+    
     # Test parameters for FM tone:
     L_FM6 = 70          # tone level, dB SPL
     delta_f6 = 200      # frequency deviation, Hz
@@ -705,6 +727,8 @@ def test6():
     if force_pass:
         test6 = True
     # ------------------------------------------------------------------------
+    
+    print('\tDone!')
     
     plt.figure(figsize=(8, 6))
     plt.plot(fc6, FS_FM_fc, label='Eq. 4 (Sottek et al, DAGA 2021)')
@@ -746,7 +770,7 @@ def test6():
     assert test6
     
 
-# %%
+# %% Call tests
 
 if __name__ == "__main__":
     test1()
