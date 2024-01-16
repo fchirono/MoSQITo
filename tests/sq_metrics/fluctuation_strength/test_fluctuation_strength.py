@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 plt.close('all')
 
 # Local application imports
-from mosqito.sq_metrics import fluctuation_strength
+from mosqito.sq_metrics import fluctuation_strength, roughness_dw
 from mosqito.sq_metrics.fluctuation_strength.utils import (
     _create_am_sin, _create_am_bbn, _create_fm_sin)
 
@@ -287,7 +287,10 @@ def test1():
     for i, f in enumerate(fm1):
         xm1 = np.sin(2*np.pi*f*t)
         x1 = _create_am_sin(Lp1, fc1, xm1, fs)
-        FS_AM1[i] = fluctuation_strength(x1, fs)
+        
+        # use roughness as a stand-in for future 'fluctuation_strength' implementation
+        r1, _, _, time1 = roughness_dw(x1, fs, overlap=0)
+        FS_AM1[i] = np.mean(r1)
     
     # normalise to FS of reference tone (8 Hz modulation rate)
     xm_ref1 = np.sin(2*np.pi*8*t)
@@ -365,7 +368,10 @@ def test2():
     for i, f in enumerate(fm2):
         xm2 = np.sin(2*np.pi*f*t)
         x2 = _create_fm_sin(Lp2, fc2, xm2, delta_f2, fs)
-        FS_FM2[i] = fluctuation_strength(x2, fs)
+        
+        # use roughness as a stand-in for future 'fluctuation_strength' implementation
+        r2, _, _, time2 = roughness_dw(x2, fs, overlap=0)
+        FS_FM2[i] = np.mean(r2)
     
     # normalise to FS of reference tone (4 Hz modulation rate)
     xm_ref2 = np.sin(2*np.pi*4*t)
@@ -444,7 +450,11 @@ def test3a():
     for i, l in enumerate(L_AM3a):
         xm3a = np.sin(2*np.pi*fm3a*t)
         x3a = _create_am_sin(l, fc3a, xm3a, fs)
-        FS_AM3a[i] = fluctuation_strength(x3a, fs)
+        
+        # use roughness as a stand-in for future 'fluctuation_strength' implementation
+        r3a, _, _, time3a = roughness_dw(x3a, fs, overlap=0)
+        FS_AM3a[i] = np.mean(r3a)
+
     
     # normalise to FS of reference tone (70 dB)
     xm_ref3a = np.sin(2*np.pi*4*t)
@@ -521,7 +531,10 @@ def test3b():
     for i, l in enumerate(L_FM3b):
         xm3b = np.sin(2*np.pi*fm3b*t)
         x3b = _create_fm_sin(l, fc3b, xm3b, delta_f3b, fs)
-        FS_FM3b[i] = fluctuation_strength(x3b, fs)
+        
+        # use roughness as a stand-in for future 'fluctuation_strength' implementation
+        r3b, _, _, time3b = roughness_dw(x3b, fs, overlap=0)
+        FS_FM3b[i] = np.mean(r3b)
     
     # normalise to FS of reference tone (70 dB)
     xm_ref3b = np.sin(2*np.pi*4*t)
@@ -602,7 +615,10 @@ def test5():
     for i, d in enumerate(delta_f5):
         xm5 = np.sin(2*np.pi*fm5*t)
         x5 = _create_fm_sin(L_FM5, fc5, xm5, d, fs)
-        FS_FM5[i] = fluctuation_strength(x5, fs)
+        
+        # use roughness as a stand-in for future 'fluctuation_strength' implementation
+        r5, _, _, time5 = roughness_dw(x5, fs, overlap=0)
+        FS_FM5[i] = np.mean(r5)
     
     # normalise to FS of reference tone (70 dB)
     xm_ref5 = np.sin(2*np.pi*4*t)
@@ -680,7 +696,10 @@ def test6():
     for i, f in enumerate(fc6):
         xm6 = np.sin(2*np.pi*fm6*t)
         x6 = _create_fm_sin(L_FM6, f, xm6, delta_f6, fs)
-        FS_FM6[i] = fluctuation_strength(x6, fs)
+        
+        # use roughness as a stand-in for future 'fluctuation_strength' implementation
+        r6, _, _, time6 = roughness_dw(x6, fs, overlap=0)
+        FS_FM6[i] = np.mean(r6)
     
     # normalise to FS of reference tone (1.5 kHz)
     xm_ref6 = np.sin(2*np.pi*4*t)
