@@ -300,7 +300,8 @@ def test1():
     # normalise to FS of reference tone (8 Hz modulation rate)
     xm_ref1 = np.sin(2*np.pi*8*t)
     x_ref1 = _create_am_sin(Lp1, fc1, xm_ref1, fs)
-    FS_AM1 *= 1/fluctuation_strength(x_ref1, fs)
+    r_ref1, _, _, _ = roughness_dw(x_ref1, fs, overlap=0)
+    FS_AM1 *= 1/np.mean(r_ref1)
     
     # test for 20% tolerance
     test1 = ((FS_AM1 < 1.2*FS_AM_fm1[::4]).all()
