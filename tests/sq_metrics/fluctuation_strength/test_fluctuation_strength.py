@@ -383,13 +383,14 @@ def test2():
         x2 = _create_fm_sin(Lp2, fc2, xm2, delta_f2, fs)
         
         # use roughness as a stand-in for future 'fluctuation_strength' implementation
-        r2, _, _, time2 = roughness_dw(x2, fs, overlap=0)
+        r2, _, _, time2 = roughness_dw(x2, fs, overlap=0.5)
         FS_FM2[i] = np.mean(r2)
     
     # normalise to FS of reference tone (4 Hz modulation rate)
     xm_ref2 = np.sin(2*np.pi*4*t)
     x_ref2 = _create_fm_sin(Lp2, fc2, xm_ref2, delta_f2, fs)
-    FS_FM2 *= 1/fluctuation_strength(x_ref2, fs)
+    r_ref2, _, _, _ = roughness_dw(x_ref2, fs, overlap=0.5)
+    FS_FM2 *= 1/np.mean(r_ref2, fs)
 
     # test for 20% tolerance
     test2 = ((FS_FM2 < 1.2*FS_FM_fm2[::4]).all()
