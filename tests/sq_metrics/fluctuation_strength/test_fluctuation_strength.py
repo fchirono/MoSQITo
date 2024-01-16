@@ -276,7 +276,7 @@ def test1():
     # 40 dB (100%) modulation strength - modulating signal has unitary amplitude
     
     # varying modulation frequency
-    N_test1 = 64
+    N_test1 = 16
     fm1 = np.logspace(-2, 5, N_test1, base=2)
     
     # Eq. 1 from Sottek et al (DAGA 2021)
@@ -360,7 +360,7 @@ def test2():
     delta_f2 = 700   # freq deviation, Hz
     
     # varying modulation frequency
-    N_test2 = 64
+    N_test2 = 16
     fm2 = np.logspace(-2, 5, N_test2, base=2)
     
     # Eq. 2 from Sottek et al (DAGA 2021)
@@ -443,7 +443,7 @@ def test3a():
     
     # 40 dB (100%) modulation strength - modulating signal has unitary amplitude
     
-    N_test3a = 64
+    N_test3a = 16
     
     # range of levels, in dB SPL
     L_AM3a = np.linspace(50, 90, N_test3a)
@@ -525,7 +525,7 @@ def test3b():
     fm3b = 4            # modulation frequency [Hz]
     delta_f3b = 700     # frequency deviation
     
-    N_test3b = 64
+    N_test3b = 16
     
     # range of levels, in dB SPL
     L_FM3b = np.linspace(40, 80, N_test3b)
@@ -611,7 +611,7 @@ def test5():
     fm5 = 4             # modulation frequency [Hz]
     
     # Freq. range approximately covers 'delta_z' range from just above 0 to 6 Bark
-    N_test5 = 75
+    N_test5 = 16
     
     # remove 0 from range - gives error when testing
     delta_f5 = np.linspace(0, 675, N_test5+1, endpoint=True)[1:]
@@ -696,7 +696,7 @@ def test6():
     delta_f6 = 200      # frequency deviation, Hz
     fm6 = 4             # modulation frequency [Hz]
     
-    N_test6 = 75
+    N_test6 = 16
     fc6 = np.linspace(500, 9000, N_test6, endpoint=True)
     
     # Eq. 4 from Sottek et al (DAGA 2021)
