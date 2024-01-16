@@ -278,7 +278,7 @@ def test1():
     # varying modulation frequency
     N_plot1 = 64+1
     fm_plot1 = np.logspace(-2, 5, N_plot1, base=2)
-    
+
     # Eq. 1 from Sottek et al (DAGA 2021)
     FS_AM_fm1 = fluct_strength_AMtone_fm(fm_plot1)/fluct_strength_AMtone_fm(8)
     
@@ -364,13 +364,16 @@ def test2():
     delta_f2 = 700   # freq deviation, Hz
     
     # varying modulation frequency
-    N_test2 = 16
-    fm2 = np.logspace(-2, 5, N_test2, base=2)
+    N_plot2 = 64+1
+    fm_plot2 = np.logspace(-2, 5, N_plot2, base=2)
     
     # Eq. 2 from Sottek et al (DAGA 2021)
-    FS_FM_fm2 = fluct_strength_FMtone_fm(fm2)/fluct_strength_FMtone_fm(4)
+    FS_FM_fm2 = fluct_strength_FMtone_fm(fm_plot2)/fluct_strength_FMtone_fm(4)
     
     # ------------------------------------------------------------------------
+    N_test2 = int(np.ceil(N_plot2/4))
+    fm2 = fm_plot2[::4]
+    
     FS_FM2 = np.zeros(N_test2)
     
     # evaluate FS for various FM tones
@@ -388,7 +391,8 @@ def test2():
     FS_FM2 *= 1/fluctuation_strength(x_ref2, fs)
 
     # test for 20% tolerance
-    test2 = (FS_FM2 < 1.2*FS_FM_fm2).all() and (FS_FM2 > 0.8*FS_FM_fm2).all()    
+    test2 = ((FS_FM2 < 1.2*FS_FM_fm2[::4]).all()
+             and (FS_FM2 > 0.8*FS_FM_fm2[::4]).all())
     
     # ------------------------------------------------------------------------
     # force test to pass
@@ -399,9 +403,9 @@ def test2():
     print('\tDone!')
     
     plt.figure(figsize=(8, 6))
-    plt.semilogx(fm2, FS_FM_fm2, label='Eq. 2 (Sottek et al, DAGA 2021)')
-    plt.semilogx(fm2, 0.8*FS_FM_fm2, 'C0--', label='20% tolerance')
-    plt.semilogx(fm2, 1.2*FS_FM_fm2, 'C0--')
+    plt.semilogx(fm_plot2, FS_FM_fm2, label='Eq. 2 (Sottek et al, DAGA 2021)')
+    plt.semilogx(fm_plot2, 0.8*FS_FM_fm2, 'C0--', label='20% tolerance')
+    plt.semilogx(fm_plot2, 1.2*FS_FM_fm2, 'C0--')
     
     plt.semilogx(fm2, FS_FM2, 'C1*:', label='MoSQITo implementation')
     
