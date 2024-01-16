@@ -477,7 +477,8 @@ def test3a():
     # normalise to FS of reference tone (70 dB)
     xm_ref3a = np.sin(2*np.pi*4*t)
     x_ref3a = _create_am_sin(70, fc3a, xm_ref3a, fs)
-    FS_AM3a *= 1/fluctuation_strength(x_ref3a, fs)
+    r_ref3a, _, _, _ = roughness_dw(x_ref3a, fs)
+    FS_AM3a *= 1/np.mean(r_ref3a)
     
     # test for 20% tolerance
     test3a = (FS_AM3a < 1.2*FS_AM_L3a).all() and (FS_AM3a > 0.8*FS_AM_L3a).all()
@@ -558,7 +559,8 @@ def test3b():
     # normalise to FS of reference tone (70 dB)
     xm_ref3b = np.sin(2*np.pi*4*t)
     x_ref3b = _create_fm_sin(70, fc3b, xm_ref3b, delta_f3b, fs)
-    FS_FM3b *= 1/fluctuation_strength(x_ref3b, fs)
+    r_ref3b, _, _, _ = roughness_dw(x_ref3b, fs)
+    FS_FM3b *= 1/np.mean(r_ref3b)
     
     # test for 20% tolerance
     test3b = (FS_FM3b < 1.2*FS_FM_L3b).all() and (FS_FM3b > 0.8*FS_FM_L3b).all()
@@ -641,10 +643,11 @@ def test5():
         r5, _, _, time5 = roughness_dw(x5, fs)
         FS_FM5[i] = np.mean(r5)
     
-    # normalise to FS of reference tone (70 dB)
+    # normalise to FS of reference tone (200 Hz freq deviation)
     xm_ref5 = np.sin(2*np.pi*4*t)
     x_ref5 = _create_fm_sin(L_FM5, fc5, xm_ref5, 200, fs)
-    FS_FM5 *= 1/fluctuation_strength(x_ref5, fs)
+    r_ref5, _, _, _ = roughness_dw(x_ref5, fs)
+    FS_FM5 *= 1/np.mean(r_ref5)
   
     # test for 20% tolerance
     test5 = (FS_FM5 < 1.2*FS_FM_deltaF).all() and (FS_FM5 > 0.8*FS_FM_deltaF).all()
@@ -727,7 +730,8 @@ def test6():
     # normalise to FS of reference tone (1.5 kHz)
     xm_ref6 = np.sin(2*np.pi*4*t)
     x_ref6 = _create_fm_sin(L_FM6, 1500, xm_ref6, delta_f6, fs)
-    FS_FM6 *= 1/fluctuation_strength(x_ref6, fs)
+    r_ref6, _, _, _ = roughness_dw(x_ref6, fs)
+    FS_FM6 *= 1/np.mean(r_ref6)
     
     # test for 20% tolerance
     test6 = (FS_FM6 < 1.2*FS_FM_fc).all() and (FS_FM6 > 0.8*FS_FM_fc).all()
