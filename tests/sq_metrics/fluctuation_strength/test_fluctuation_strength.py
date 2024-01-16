@@ -276,13 +276,16 @@ def test1():
     # 40 dB (100%) modulation strength - modulating signal has unitary amplitude
     
     # varying modulation frequency
-    N_test1 = 16
-    fm1 = np.logspace(-2, 5, N_test1, base=2)
+    N_plot1 = 64+1
+    fm_plot1 = np.logspace(-2, 5, N_plot1, base=2)
     
     # Eq. 1 from Sottek et al (DAGA 2021)
-    FS_AM_fm1 = fluct_strength_AMtone_fm(fm1)/fluct_strength_AMtone_fm(8)
+    FS_AM_fm1 = fluct_strength_AMtone_fm(fm_plot1)/fluct_strength_AMtone_fm(8)
     
     # ------------------------------------------------------------------------
+    N_test1 = int(np.ceil(N_plot1/4))
+    fm1 = fm_plot1[::4]
+    
     FS_AM1 = np.zeros(N_test1)
     
     # evaluate FS for various AM tones
@@ -300,7 +303,8 @@ def test1():
     FS_AM1 *= 1/fluctuation_strength(x_ref1, fs)
     
     # test for 20% tolerance
-    test1 = (FS_AM1 < 1.2*FS_AM_fm1).all() and (FS_AM1 > 0.8*FS_AM_fm1).all()
+    test1 = ((FS_AM1 < 1.2*FS_AM_fm1[::4]).all()
+             and (FS_AM1 > 0.8*FS_AM_fm1[::4]).all())
     
     # ------------------------------------------------------------------------
     # force test to pass
@@ -312,9 +316,9 @@ def test1():
     
     # plot Figure 1
     plt.figure(figsize=(8, 6))
-    plt.semilogx(fm1, FS_AM_fm1, label='Eq. 1 (Sottek et al, DAGA 2021)')
-    plt.semilogx(fm1, 0.8*FS_AM_fm1, 'C0--', label='20% tolerance')
-    plt.semilogx(fm1, 1.2*FS_AM_fm1, 'C0--')
+    plt.semilogx(fm_plot1, FS_AM_fm1, label='Eq. 1 (Sottek et al, DAGA 2021)')
+    plt.semilogx(fm_plot1, 0.8*FS_AM_fm1, 'C0--', label='20% tolerance')
+    plt.semilogx(fm_plot1, 1.2*FS_AM_fm1, 'C0--')
     
     plt.semilogx(fm1, FS_AM1, 'C1*:', label='MoSQITo implementation')
     
