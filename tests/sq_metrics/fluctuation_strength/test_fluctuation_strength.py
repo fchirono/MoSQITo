@@ -294,13 +294,13 @@ def test1():
         x1 = _create_am_sin(Lp1, fc1, xm1, fs)
         
         # use roughness as a stand-in for future 'fluctuation_strength' implementation
-        r1, _, _, time1 = roughness_dw(x1, fs, overlap=0)
+        r1, _, _, time1 = roughness_dw(x1, fs)
         FS_AM1[i] = np.mean(r1)
     
     # normalise to FS of reference tone (8 Hz modulation rate)
     xm_ref1 = np.sin(2*np.pi*8*t)
     x_ref1 = _create_am_sin(Lp1, fc1, xm_ref1, fs)
-    r_ref1, _, _, _ = roughness_dw(x_ref1, fs, overlap=0)
+    r_ref1, _, _, _ = roughness_dw(x_ref1, fs)
     FS_AM1 *= 1/np.mean(r_ref1)
     
     # test for 20% tolerance
@@ -383,14 +383,14 @@ def test2():
         x2 = _create_fm_sin(Lp2, fc2, xm2, delta_f2, fs)
         
         # use roughness as a stand-in for future 'fluctuation_strength' implementation
-        r2, _, _, time2 = roughness_dw(x2, fs, overlap=0.5)
+        r2, _, _, time2 = roughness_dw(x2, fs)
         FS_FM2[i] = np.mean(r2)
     
     # normalise to FS of reference tone (4 Hz modulation rate)
     xm_ref2 = np.sin(2*np.pi*4*t)
     x_ref2 = _create_fm_sin(Lp2, fc2, xm_ref2, delta_f2, fs)
-    r_ref2, _, _, _ = roughness_dw(x_ref2, fs, overlap=0.5)
-    FS_FM2 *= 1/np.mean(r_ref2, fs)
+    r_ref2, _, _, _ = roughness_dw(x_ref2, fs)
+    FS_FM2 *= 1/np.mean(r_ref2)
 
     # test for 20% tolerance
     test2 = ((FS_FM2 < 1.2*FS_FM_fm2[::4]).all()
@@ -470,7 +470,7 @@ def test3a():
         x3a = _create_am_sin(l, fc3a, xm3a, fs)
         
         # use roughness as a stand-in for future 'fluctuation_strength' implementation
-        r3a, _, _, time3a = roughness_dw(x3a, fs, overlap=0)
+        r3a, _, _, time3a = roughness_dw(x3a, fs)
         FS_AM3a[i] = np.mean(r3a)
 
     
@@ -552,7 +552,7 @@ def test3b():
         x3b = _create_fm_sin(l, fc3b, xm3b, delta_f3b, fs)
         
         # use roughness as a stand-in for future 'fluctuation_strength' implementation
-        r3b, _, _, time3b = roughness_dw(x3b, fs, overlap=0)
+        r3b, _, _, time3b = roughness_dw(x3b, fs)
         FS_FM3b[i] = np.mean(r3b)
     
     # normalise to FS of reference tone (70 dB)
@@ -638,7 +638,7 @@ def test5():
         x5 = _create_fm_sin(L_FM5, fc5, xm5, d, fs)
         
         # use roughness as a stand-in for future 'fluctuation_strength' implementation
-        r5, _, _, time5 = roughness_dw(x5, fs, overlap=0)
+        r5, _, _, time5 = roughness_dw(x5, fs)
         FS_FM5[i] = np.mean(r5)
     
     # normalise to FS of reference tone (70 dB)
@@ -721,7 +721,7 @@ def test6():
         x6 = _create_fm_sin(L_FM6, f, xm6, delta_f6, fs)
         
         # use roughness as a stand-in for future 'fluctuation_strength' implementation
-        r6, _, _, time6 = roughness_dw(x6, fs, overlap=0)
+        r6, _, _, time6 = roughness_dw(x6, fs)
         FS_FM6[i] = np.mean(r6)
     
     # normalise to FS of reference tone (1.5 kHz)
