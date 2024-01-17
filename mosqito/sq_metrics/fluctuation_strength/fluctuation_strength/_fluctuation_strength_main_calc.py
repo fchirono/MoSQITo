@@ -62,6 +62,7 @@ def _fluctuation_strength_main_calc(spec, freq_axis, fs, gzi, hWeight):
     nZ = np.arange(1, n//2 + 1, 1)
 
     # Calculate Zwicker a0 factor (transfer characteristic of the outer and inner ear)
+    # TODO: check if a0 needs to be adapted for FS calculation!
     a0 = np.zeros((n))
     a0[nZ - 1] = db2amp(_ear_filter_coeff(bark_axis), ref=1)
     spec = a0 * spec
@@ -71,6 +72,7 @@ def _fluctuation_strength_main_calc(spec, freq_axis, fs, gzi, hWeight):
     spec_dB = amp2db(module, ref=2e-5)
     
     # Find the audible components within the spec
+    # TODO: adapt for FS calculation!
     threshold = LTQ(bark_axis, reference="roughness")
     audible_index = np.where(spec_dB > threshold)[0]
     
@@ -79,7 +81,8 @@ def _fluctuation_strength_main_calc(spec, freq_axis, fs, gzi, hWeight):
 
     # --------------------------------- stage 1 ------------------------------------
     # ----------------Creation of the specific excitations functions----------------
-
+    # TODO: adapt for FS calculation!
+    
     # Terhardt's slopes definition
     # lower slope [dB/Bark]
     s1 = -27
@@ -156,7 +159,8 @@ def _fluctuation_strength_main_calc(spec, freq_axis, fs, gzi, hWeight):
         
         # ------------------------------- stage 2 --------------------------------------
         # ---------------------modulation depth calculation-----------------------------
-
+        # TODO: adapt for FS calculation!
+        
         # The fluctuations of the envelope are contained in the low frequency part
         # of the spec of specific excitations in absolute value
         h0 = np.mean(temporal_excitation)
@@ -165,6 +169,7 @@ def _fluctuation_strength_main_calc(spec, freq_axis, fs, gzi, hWeight):
         # This spec is weighted to model the low-frequency  bandpass
         # characteristic of the roughness on modulation frequency
         envelope_spec = envelope_spec * hWeight[i, :]
+        
         # The time functions of the bandpass filtered envelopes hBPi(t)
         # are calculated via inverse Fourier transform :
         hBP[i, :] = 2 * np.real(ifft(envelope_spec))
@@ -181,7 +186,8 @@ def _fluctuation_strength_main_calc(spec, freq_axis, fs, gzi, hWeight):
             
     # ------------------------------- stage 3 --------------------------------------
     # ----------------roughness calculation with cross correlation------------------
-
+    # TODO: adapt for FS calculation!
+    
     # Crosscorrelation coefficients between the envelopes of the channels
     # i and i+2 with dz= 1 bark
     ki = np.zeros((47))
@@ -196,8 +202,10 @@ def _fluctuation_strength_main_calc(spec, freq_axis, fs, gzi, hWeight):
 
     FS_spec[0] = gzi[0] * pow(mod_depth[0] * ki[0], 2)
     FS_spec[1] = gzi[1] * pow(mod_depth[1] * ki[1], 2)
+    
     for i in np.arange(2, 45):
         FS_spec[i] = gzi[i] * pow(mod_depth[i] * ki[i] * ki[i - 2], 2)
+        
     FS_spec[45] = gzi[45] * pow(mod_depth[45] * ki[43], 2)
     FS_spec[46] = gzi[46] * pow(mod_depth[46] * ki[44], 2)
 

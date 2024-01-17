@@ -71,14 +71,18 @@ def fluctuation_strength(signal, fs=None, overlap=0.5, is_sdt_output=False):
         fs = 1 / (time[1] - time[0])
         signal = signal.get_along("time")[signal.symbol]
 
-    # Number of points within each frame according to the time resolution of 200ms
+    # Number of points within each frame according to the time resolution of ~200ms
+    # TODO: adapt for FS calculation!
     nperseg = int(0.2 * fs)
+    
     # Overlapping segment length
     noverlap = int(overlap * nperseg)
+    
     # reshaping of the signal according to the overlap and time proportions
     sig, time = time_segmentation(
         signal, fs, nperseg=nperseg, noverlap=noverlap, is_ecma=False
     )
+    
     if len(sig.shape) == 1:
         nseg = 1
     else:
@@ -90,9 +94,11 @@ def fluctuation_strength(signal, fs=None, overlap=0.5, is_sdt_output=False):
     freq_axis = np.arange(1, nperseg // 2 + 1, 1) * (fs / nperseg)
 
     # Initialization of the weighting functions H and g
+    # TODO: adapt for FS calculation!
     hWeight = _H_weighting(nperseg, fs)
     
     # Aures modulation depth weighting function
+    # TODO: adapt for FS calculation!
     gzi = _gzi_weighting(np.arange(1, 48, 1) / 2)
 
     FS = np.zeros((nseg))
