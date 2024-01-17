@@ -19,25 +19,32 @@ def _fluctuation_strength_main_calc(spec, freq_axis, fs, gzi, hWeight):
     It is currently a direct copy of the Roughness calculation given in the
     '_roughness_dw_main_calc' function.
 
+
     Parameters
     ----------
     spec : array
         An amplitude or complex spectrum.
+        
     freq_axis : array
         Frequency axis in [Hz].
+        
     fs : integer
         Sampling frequency.
+        
     gzi : array
         gzi weighting function.
+        
     hWeight : array
         H weighting function.
 
+
     Returns
     -------
-    R : float
-        Roughness computed for the given spectrum.
+    FS : float
+        Fluctuation Strength computed for the given spectrum.
 
     """
+    
     if len(spec) != len(freq_axis):
         raise ValueError(
             "spectrum and frequency axis should have the same number of points !"
@@ -47,8 +54,10 @@ def _fluctuation_strength_main_calc(spec, freq_axis, fs, gzi, hWeight):
     spec = np.concatenate((spec, spec[len(spec)::-1]))
 
     n = len(spec)
+    
     # Frequency axis in Bark
     bark_axis = freq2bark(freq_axis)
+    
     # Highest frequency
     nZ = np.arange(1, n//2 + 1, 1)
 
@@ -64,6 +73,7 @@ def _fluctuation_strength_main_calc(spec, freq_axis, fs, gzi, hWeight):
     # Find the audible components within the spec
     threshold = LTQ(bark_axis, reference="roughness")
     audible_index = np.where(spec_dB > threshold)[0]
+    
     # Number of audible frequencies
     n_aud = len(audible_index)
 
@@ -83,18 +93,23 @@ def _fluctuation_strength_main_calc(spec, freq_axis, fs, gzi, hWeight):
 
     # The excitation pattern are calculated for 47 overlapping 1-bark-wide channels
     n_channel = 47
+    
     # Channels number
     zi = np.arange(1, n_channel + 1) / 2
+    
     # Center frequencies for each channel
     zb = bark2freq(zi) * n / fs
+    
     # Minimum excitation level
     minExcitDB = np.interp(zb, nZ, threshold)
     
     ch_low = np.zeros((n_aud))
     ch_high = np.zeros((n_aud))
+    
     for i in np.arange(0, n_aud):
         # Lower limit of the channel corresponding to each component
         ch_low[i] = math.floor(2 * bark_axis[audible_index[i]]) - 1
+        
         # Higher limit
         ch_high[i] = math.ceil(2 * bark_axis[audible_index[i]]) - 1
 
@@ -138,6 +153,7 @@ def _fluctuation_strength_main_calc(spec, freq_axis, fs, gzi, hWeight):
 
         # The temporal specific excitation functions are obtained by IFFT
         temporal_excitation = np.abs(n * np.real(ifft(exc)))
+        
         # ------------------------------- stage 2 --------------------------------------
         # ---------------------modulation depth calculation-----------------------------
 
@@ -162,6 +178,7 @@ def _fluctuation_strength_main_calc(spec, freq_axis, fs, gzi, hWeight):
                 mod_depth[i] = 1
         else:
             mod_depth[i] = 0
+            
     # ------------------------------- stage 3 --------------------------------------
     # ----------------roughness calculation with cross correlation------------------
 
@@ -175,22 +192,22 @@ def _fluctuation_strength_main_calc(spec, freq_axis, fs, gzi, hWeight):
 
     # Specific roughness calculation with gzi the modulation depth weighting
     # function given by Aures
-    R_spec = np.zeros((47))
+    FS_spec = np.zeros((47))
 
-    R_spec[0] = gzi[0] * pow(mod_depth[0] * ki[0], 2)
-    R_spec[1] = gzi[1] * pow(mod_depth[1] * ki[1], 2)
+    FS_spec[0] = gzi[0] * pow(mod_depth[0] * ki[0], 2)
+    FS_spec[1] = gzi[1] * pow(mod_depth[1] * ki[1], 2)
     for i in np.arange(2, 45):
-        R_spec[i] = gzi[i] * pow(mod_depth[i] * ki[i] * ki[i - 2], 2)
-    R_spec[45] = gzi[45] * pow(mod_depth[45] * ki[43], 2)
-    R_spec[46] = gzi[46] * pow(mod_depth[46] * ki[44], 2)
+        FS_spec[i] = gzi[i] * pow(mod_depth[i] * ki[i] * ki[i - 2], 2)
+    FS_spec[45] = gzi[45] * pow(mod_depth[45] * ki[43], 2)
+    FS_spec[46] = gzi[46] * pow(mod_depth[46] * ki[44], 2)
 
     # Total roughness calculation with calibration factor of 0.25 given in the article
     # to produce a roughness of 1 asper for a 1-kHz, 60dB tone with carrier frequency
     # of 70 Hz and a modulation depth of 1
 
-    R = 0.25 * sum(R_spec)
+    FS = 0.25 * sum(FS_spec)
 
-    return R, R_spec, zi
+    return FS, FS_spec, zi
 
 
 
