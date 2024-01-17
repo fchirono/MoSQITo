@@ -13,11 +13,11 @@ import numpy as np
 # Local imports
 from mosqito.utils.time_segmentation import time_segmentation
 from mosqito.sound_level_meter.spectrum import spectrum
-from mosqito.sq_metrics.roughness.roughness_dw._roughness_dw_main_calc import (
-    _roughness_dw_main_calc,
-)
-from mosqito.sq_metrics.roughness.roughness_dw._gzi_weighting import _gzi_weighting
-from mosqito.sq_metrics.roughness.roughness_dw._H_weighting import _H_weighting
+
+from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._fluctuation_strength_main_calc import _fluctuation_strength_main_calc
+from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._gzi_weighting import _gzi_weighting
+from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._H_weighting import _H_weighting
+
 
 # Optional package import
 try:
@@ -35,24 +35,31 @@ def fluctuation_strength(signal, fs=None, overlap=0.5, is_sdt_output=False):
     It is currently a direct copy of the Roughness calculation given in the
     'roughness_dw' function.
 
+
     Parameters
     ----------
     signal :numpy.array  or DataTime object
         A time signal in Pa
+        
     fs : float, optional
         Sampling frequency, can be omitted if the input is a DataTime
         object. Default to None
+        
     overlap : float
         Overlapping coefficient for the time windows of 200ms
+
 
     Outputs
     -------
     FS : numpy.array
         Fluctuation Strength in [vacil].
+        
     FS_spec : numpy.array
         Specific Fluctuation Strength over bark axis.
+        
     bark_axis : numpy.array
         Frequency axis in [bark].
+        
     time : numpy.array
         Time axis in [s].
 
@@ -84,18 +91,19 @@ def fluctuation_strength(signal, fs=None, overlap=0.5, is_sdt_output=False):
 
     # Initialization of the weighting functions H and g
     hWeight = _H_weighting(nperseg, fs)
+    
     # Aures modulation depth weighting function
     gzi = _gzi_weighting(np.arange(1, 48, 1) / 2)
 
-    R = np.zeros((nseg))
-    R_spec = np.zeros((47, nseg))
+    FS = np.zeros((nseg))
+    FS_spec = np.zeros((47, nseg))
     if len(spec.shape) > 1:
         for i in range(nseg):
-            R[i], R_spec[:, i], bark_axis = _roughness_dw_main_calc(
+            FS[i], FS_spec[:, i], bark_axis = _fluctuation_strength_main_calc(
                 spec[:, i], freq_axis, fs, gzi, hWeight
             )
     else:
-        R, R_spec, bark_axis = _roughness_dw_main_calc(
+        FS, FS_spec, bark_axis = _fluctuation_strength_main_calc(
             spec, freq_axis, fs, gzi, hWeight
         )
 
@@ -127,19 +135,19 @@ def fluctuation_strength(signal, fs=None, overlap=0.5, is_sdt_output=False):
                 number=len(time),
                 include_endpoint=True,
             )
-            R_spec = DataFreq(
-                name="Specific roughness (Daniel & Weber method)",
-                symbol="R'_{dw}",
+            FS_spec = DataFreq(
+                name="Specific Fluctuation Strength",
+                symbol="FS",
                 axes=[bark_data, time],
-                values=R_spec,
-                unit="asper/Bark",
+                values=FS_spec,
+                unit="vacil/Bark",
             )
-            R = DataTime(
-                name="Roughness (Daniel & Weber method)",
-                symbol="R_{dw}",
+            FS = DataTime(
+                name="Fluctuation Strength",
+                symbol="FS",
                 axes=[time],
-                values=R,
-                unit="asper",
+                values=FS,
+                unit="vacil",
             )
 
-    return R, R_spec, bark_axis, time
+    return FS, FS_spec, bark_axis, time
