@@ -29,10 +29,10 @@ except ImportError:
 
 
 def fluctuation_strength(signal, fs=None, overlap=0.5, is_sdt_output=False):
-    """Fluctuation Strength calculation of a signal sampled at 48kHz.
+    """[*WARNING*] Fluctuation Strength calculation of a signal sampled at 48kHz.
 
-    The code is a stand-in for the Fluctuation Strength calculation. It is
-    currently a direct copy of the Roughness calculation given in the
+    *WARNING*: The code is a stand-in for the Fluctuation Strength calculation.
+    It is currently a direct copy of the Roughness calculation given in the
     'roughness_dw' function.
 
     Parameters
