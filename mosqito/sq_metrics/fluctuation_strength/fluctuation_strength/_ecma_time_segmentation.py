@@ -24,9 +24,9 @@ def _ecma_time_segmentation(signal_block, sb, sh, n_new):
     
     Returns
     -------
-    block_array: numpy.array
-        A 2-dimensional array of size (nperseg, nseg)
-        containing the segmented signal.
+    block_array: list
+        List of 53 two-dimensional arrays of size (nperseg, nseg)
+        containing the segmented signal per critical band.
     
     time: numpy.array
         The time axis corresponding to the segmented
@@ -49,26 +49,32 @@ def _ecma_time_segmentation(signal_block, sb, sh, n_new):
     # ************************************************************************
     # Section 5.1.5 of ECMA-418-2, 2nd Ed. (2022)
     
-    i_start = np.zeros(53)
-    l_last = np.zeros(53)
     
+    # Eq. (19)
+    i_start = sb[0] - sb
+    
+    # Eq. (20) - number of blocks for each critical band
+    L_last = (np.ceil( (n_new + sh) / sh) - 1).astype('int')
     
     block_array = []
     for z in range(53):
-        signal = signal_block[z]
-    
-        # Eq. (19)
-        i_start[z] = sb[0] - sb[z]
         
-        l_last[z] = np.ceil( (n_new + sh[z]) / sh[z]) - 1
-    
-        # TODO: complete implementing time segmentation!
+        signal = signal_block[z]
+        
+        signal_segmented = np.zeros((sb[z], L_last[z]))
+        
+        for L in np.arange(L_last[z]):
+            
+            # Eq. (18)
+            indices = np.arange(L*sh[z] + i_start[z], L*sh[z] + i_start[z] + sb[z])
+            signal_segmented[:, L] = signal[indices]
+
         block_array.append(signal)
         
     return block_array
 
 
-# ************************************************************************
+# %% ************************************************************************
 # Original version, from mosqito.utils
 
 # # build time axis for sig
