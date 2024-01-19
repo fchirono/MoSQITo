@@ -102,7 +102,8 @@ def fluctuation_strength(signal, fs, sb=2048, sh=1024):
     # Section 5.1.5 of ECMA-418-2, 2nd Ed. (2022)
     
     # segmentation into blocks
-    block_array = _ecma_time_segmentation(bandpass_signals, sb, sh, n_new)
+    block_array, time_array = _ecma_time_segmentation(bandpass_signals, sb, sh,
+                                                      n_new)
     
     # ************************************************************************
     # Section 5.1.6 of ECMA-418-2, 2nd Ed. (2022)

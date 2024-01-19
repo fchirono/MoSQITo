@@ -52,7 +52,6 @@ def _ecma_time_segmentation(signal_block, sb, sh, n_new):
     # ************************************************************************
     # Section 5.1.5 of ECMA-418-2, 2nd Ed. (2022)
     
-    
     # Eq. (19)
     i_start = sb[0] - sb
     
@@ -69,7 +68,7 @@ def _ecma_time_segmentation(signal_block, sb, sh, n_new):
         # build time vector for signal
         time = np.linspace(0, (signal.shape[0] - 1) / fs, signal.shape[0])
         
-        signal_segmented = np.zeros((sb[z], L_last[z]))
+        signal_segmented = np.zeros((L_last[z], sb[z]))
         time_segmented = np.zeros(L_last[z])
         
         for L in np.arange(L_last[z]):
@@ -77,13 +76,13 @@ def _ecma_time_segmentation(signal_block, sb, sh, n_new):
             # Eq. (18)
             indices = np.arange(L*sh[z] + i_start[z], L*sh[z] + i_start[z] + sb[z])
             
-            signal_segmented[:, L] = signal[indices]
+            signal_segmented[L, :] = signal[indices]
             
             # TODO: is 'mean' the best estimate for time? Maybe should use
             # segment start time instead?
             time_segmented[L] = np.mean(time[indices])
             
-        block_array.append(signal)
+        block_array.append(signal_segmented)
         time_array.append(time_segmented)
         
     return block_array, time_array
