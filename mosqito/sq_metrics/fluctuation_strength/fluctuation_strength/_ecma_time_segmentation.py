@@ -78,8 +78,8 @@ def _ecma_time_segmentation(signal_block, sb, sh, n_new):
             
             signal_segmented[L, :] = signal[indices]
             
-            # TODO: is 'mean' the best estimate for time? Maybe should use
-            # segment start time instead?
+            # TODO: is 'mean' the best estimate for block time? Maybe should
+            # use block start time instead?
             time_segmented[L] = np.mean(time[indices])
             
         block_array.append(signal_segmented)
