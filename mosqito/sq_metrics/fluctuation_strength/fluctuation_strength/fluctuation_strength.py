@@ -26,11 +26,11 @@ def fluctuation_strength(signal, fs, sb=2048, sh=1024):
     """[*WARNING*] Fluctuation Strength calculation of a signal sampled at 48kHz.
 
     *************************** WARNING! ************************************
-    
-    * The code is not finished yet, and does not return correct results!    *
-    
+    * The code is not finished yet, and does not return correct results!    *    
     *************************************************************************
 
+    This code implements a version of Fluctuation Strength calculation based on
+    the Roughness standard published in ECMA-418-2, 2nd Ed (2022).
 
     Parameters
     ----------
