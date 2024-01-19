@@ -30,7 +30,7 @@ except ImportError:
     DataFreq = None
 
 
-def fluctuation_strength(signal, fs, sb, sh):
+def fluctuation_strength(signal, fs, sb=2048, sh=1024):
     """[*WARNING*] Fluctuation Strength calculation of a signal sampled at 48kHz.
 
     *************************** WARNING! ************************************
@@ -49,10 +49,10 @@ def fluctuation_strength(signal, fs, sb, sh):
         Sampling frequency, in Hz.
         
     sb: int or list of int
-        Block size.
+        Block size, or list of block sizes per band
         
     sh: int or list of int
-        Hop size.
+        Hop size, or list of hop sizes per band
 
     Returns
     -------
@@ -66,6 +66,38 @@ def fluctuation_strength(signal, fs, sb, sh):
         Bark axis
     """
     
+    assert fs == 48000, "Sampling frequency 'fs' must be 48 kHz!"
+    
+    n_samples = signal.shape[0]
+    
+    # ************************************************************************
+    # Section 5.1.2 of ECMA-418-2, 2nd Ed (2022)
+    
+    # -----------------------------------------------------------------------    
+    # Apply windowing function to first 5 ms (240 samples)
+    n_fadein = 240
+    
+    # Eq. (1)
+    w_fadein = 0.5 - 0.5*np.cos(np.pi*np.arange(n_fadein)/n_fadein)
+    
+    signal[:240] *= w_fadein
+    
+    # -----------------------------------------------------------------------    
+    # Calculate zero padding at start and end of signal
+    sb_max = np.max(sb)
+    sh_max = np.max(sh)
+    
+    n_zeros_start = sb_max
+    
+    # Eqs. (2), (3) 
+    n_new = sh_max * (np.ceil((n_samples + sh_max + sb_max)/(sh_max)) - 1)
+    n_zeros_end = int(n_new) - n_samples
+    
+    signal = np.concatenate( (np.zeros(n_zeros_start),
+                              signal,
+                              np.zeros(n_zeros_end)))
+    
+    # -----------------------------------------------------------------------    
     # Computaton of rectified band-pass signals
     # (section 5.1.2 to 5.1.5 of ECMA-418-2, 2020)
     block_array_rect = _rectified_band_pass_signals(signal, sb, sh)
