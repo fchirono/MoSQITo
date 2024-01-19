@@ -12,10 +12,12 @@ import numpy as np
 
 
 # Project Imports
-from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._rectified_band_pass_signals import (
-    _rectified_band_pass_signals,
+from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._band_pass_signals import (
+    _band_pass_signals,
 )
 from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._nonlinearity import _nonlinearity
+from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._ecma_time_segmentation import _ecma_time_segmentation
+
 
 # Data import
 # Threshold in quiet
@@ -83,6 +85,7 @@ def fluctuation_strength(signal, fs, sb=2048, sh=1024):
     
     # Eqs. (2), (3) 
     n_new = sh_max * (np.ceil((n_samples + sh_max + sb_max)/(sh_max)) - 1)
+    
     n_zeros_end = int(n_new) - n_samples
     
     signal = np.concatenate( (np.zeros(n_zeros_start),
@@ -90,28 +93,42 @@ def fluctuation_strength(signal, fs, sb=2048, sh=1024):
                               np.zeros(n_zeros_end)))
     
     # ************************************************************************
-    # Section 5.1.3 to 5.1.6 of ECMA-418-2, 2nd Ed. (2022)
+    # Sections 5.1.3 to 5.1.4 of ECMA-418-2, 2nd Ed. (2022)
     
-    # Computaton of rectified band-pass signals
-    block_array_rect = _rectified_band_pass_signals(signal, sb, sh)
+    # Computaton of band-pass signals
+    bandpass_signals = _band_pass_signals(signal)
 
+    # ************************************************************************
+    # Section 5.1.5 of ECMA-418-2, 2nd Ed. (2022)
+    
+    # segmentation into blocks
+    block_array = _ecma_time_segmentation(bandpass_signals, sb, sh, n_new)
+    
+    # ************************************************************************
+    # Section 5.1.6 of ECMA-418-2, 2nd Ed. (2022)
+    # Rectification (Eq. 21)
+    
+    block_array_rect = np.clip(block_array, a_min=0.00, a_max=None)
+
+    # ************************************************************************
+    # Sections 5.1.7 to 5.1.9 of ECMA-418-2, 2nd Ed. (2022)
     
     FS_specific = []
     for band_number in range(53):
-        # ROOT-MEAN-SQUARE (section 5.1.6)
+        # ROOT-MEAN-SQUARE (section 5.1.7)
         # After the segmentation of the signal into blocks, root-mean square values of each block are calculated
         # according to Formula 17.
         rms_block_value = np.sqrt(
             2 * np.mean(np.array(block_array_rect[band_number]) ** 2, axis=1)
         )
 
-        # NON-LINEARITY (section 5.1.7)
+        # NON-LINEARITY (section 5.1.8)
         # This section covers the other part of the calculations needed to consider the non-linear transformation
         # of sound pressure to specific loudness that does the the auditory system. After this point, the
         # computation is done equally to every block in which we have divided our signal.
         a_prime = _nonlinearity(rms_block_value)
 
-        # SPECIFIC LOUDNESS CONSIDERING THE THRESHOLD IN QUIET (section 5.1.8)
+        # SPECIFIC LOUDNESS CONSIDERING THE THRESHOLD IN QUIET (section 5.1.9)
         # The next calculation helps us obtain the result for the specific loudness - specific loudness with
         # consideration of the lower threshold of hearing.
         a_prime[a_prime < ltq_z[band_number]] = ltq_z[band_number]
