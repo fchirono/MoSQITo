@@ -28,10 +28,13 @@ def _ecma_time_segmentation(signal_block, sb, sh, n_new):
         List of 53 two-dimensional arrays of size (nperseg, nseg)
         containing the segmented signal per critical band.
     
-    time: numpy.array
-        The time axis corresponding to the segmented
-        signal, size (nseg,)
+    time: list
+        List of  Numpy arrays of size (nseg,) containing the time axis
+        corresponding to each segmented signal
     """
+
+    # Sampling frequency must be 48 kHz for ECMA-418-2 (2022)
+    fs = 48000
 
     if isinstance(sb, int):
         sb = sb * np.ones(53, dtype=int)
@@ -57,21 +60,30 @@ def _ecma_time_segmentation(signal_block, sb, sh, n_new):
     L_last = (np.ceil( (n_new + sh) / sh) - 1).astype('int')
     
     block_array = []
+    time_array = []
+    
     for z in range(53):
         
         signal = signal_block[z]
         
+        # build time vector for signal
+        time = np.linspace(0, (signal.shape[0] - 1) / fs, signal.shape[0])
+        
         signal_segmented = np.zeros((sb[z], L_last[z]))
+        time_segmented = np.zeros(L_last[z])
         
         for L in np.arange(L_last[z]):
             
             # Eq. (18)
             indices = np.arange(L*sh[z] + i_start[z], L*sh[z] + i_start[z] + sb[z])
+            
             signal_segmented[:, L] = signal[indices]
-
+            time_segmented[L] = np.mean(time[indices])
+            
         block_array.append(signal)
+        time_array.append(time_segmented)
         
-    return block_array
+    return block_array, time_array
 
 
 # %% ************************************************************************
