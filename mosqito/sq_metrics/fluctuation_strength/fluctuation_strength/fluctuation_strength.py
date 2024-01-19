@@ -12,22 +12,14 @@ import numpy as np
 
 
 # Project Imports
-from mosqito.sq_metrics.loudness.loudness_ecma._rectified_band_pass_signals import (
+from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._rectified_band_pass_signals import (
     _rectified_band_pass_signals,
 )
-from mosqito.sq_metrics.loudness.loudness_ecma._nonlinearity import _nonlinearity
+from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._nonlinearity import _nonlinearity
 
 # Data import
 # Threshold in quiet
-from mosqito.sq_metrics.loudness.loudness_ecma._loudness_ecma_data import ltq_z
-
-# Optional package import
-try:
-    from SciDataTool import DataTime, DataLinspace, DataFreq, Norm_func
-except ImportError:
-    DataTime = None
-    DataLinspace = None
-    DataFreq = None
+from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._loudness_ecma_data import ltq_z
 
 
 def fluctuation_strength(signal, fs, sb=2048, sh=1024):
@@ -97,9 +89,10 @@ def fluctuation_strength(signal, fs, sb=2048, sh=1024):
                               signal,
                               np.zeros(n_zeros_end)))
     
-    # -----------------------------------------------------------------------    
+    # ************************************************************************
+    # Section 5.1.3 to 5.1.6 of ECMA-418-2, 2nd Ed. (2022)
+    
     # Computaton of rectified band-pass signals
-    # (section 5.1.2 to 5.1.5 of ECMA-418-2, 2020)
     block_array_rect = _rectified_band_pass_signals(signal, sb, sh)
 
     
