@@ -31,7 +31,8 @@ import matplotlib.pyplot as plt
 plt.close('all')
 
 # Local application imports
-from mosqito.sq_metrics import fluctuation_strength
+from mosqito.sq_metrics import fluctuation_strength, loudness_ecma
+
 from mosqito.sq_metrics.fluctuation_strength.utils import (
     _create_am_sin, _create_am_bbn, _create_fm_sin)
 
@@ -293,13 +294,13 @@ def test1():
         xm1 = np.sin(2*np.pi*f*t)
         x1 = _create_am_sin(Lp1, fc1, xm1, fs)
         
-        fs1, _, _, time1 = fluctuation_strength(x1, fs)
+        fs1, _ = fluctuation_strength(x1, fs, sb=2048, sh=1024)
         FS_AM1[i] = np.mean(fs1)
     
     # normalise to FS of reference tone (8 Hz modulation rate)
     xm_ref1 = np.sin(2*np.pi*8*t)
     x_ref1 = _create_am_sin(Lp1, fc1, xm_ref1, fs)
-    r_ref1, _, _, _ = fluctuation_strength(x_ref1, fs)
+    r_ref1, _ = fluctuation_strength(x_ref1, fs, sb=2048, sh=1024)
     FS_AM1 *= 1/np.mean(r_ref1)
     
     # test for 20% tolerance
@@ -381,14 +382,13 @@ def test2():
         xm2 = np.sin(2*np.pi*f*t)
         x2 = _create_fm_sin(Lp2, fc2, xm2, delta_f2, fs)
         
-        # use roughness as a stand-in for future 'fluctuation_strength' implementation
-        fs2, _, _, time2 = fluctuation_strength(x2, fs)
+        fs2, _ = fluctuation_strength(x2, fs, sb=2048, sh=1024)
         FS_FM2[i] = np.mean(fs2)
     
     # normalise to FS of reference tone (4 Hz modulation rate)
     xm_ref2 = np.sin(2*np.pi*4*t)
     x_ref2 = _create_fm_sin(Lp2, fc2, xm_ref2, delta_f2, fs)
-    r_ref2, _, _, _ = fluctuation_strength(x_ref2, fs)
+    r_ref2, _ = fluctuation_strength(x_ref2, fs, sb=2048, sh=1024)
     FS_FM2 *= 1/np.mean(r_ref2)
 
     # test for 20% tolerance
@@ -468,15 +468,14 @@ def test3a():
         xm3a = np.sin(2*np.pi*fm3a*t)
         x3a = _create_am_sin(l, fc3a, xm3a, fs)
         
-        # use roughness as a stand-in for future 'fluctuation_strength' implementation
-        fs3a, _, _, time3a = fluctuation_strength(x3a, fs)
+        fs3a, _ = fluctuation_strength(x3a, fs, sb=2048, sh=1024)
         FS_AM3a[i] = np.mean(fs3a)
 
     
     # normalise to FS of reference tone (70 dB)
     xm_ref3a = np.sin(2*np.pi*4*t)
     x_ref3a = _create_am_sin(70, fc3a, xm_ref3a, fs)
-    r_ref3a, _, _, _ = fluctuation_strength(x_ref3a, fs)
+    r_ref3a, _ = fluctuation_strength(x_ref3a, fs, sb=2048, sh=1024)
     FS_AM3a *= 1/np.mean(r_ref3a)
     
     # test for 20% tolerance
@@ -551,14 +550,13 @@ def test3b():
         xm3b = np.sin(2*np.pi*fm3b*t)
         x3b = _create_fm_sin(l, fc3b, xm3b, delta_f3b, fs)
         
-        # use roughness as a stand-in for future 'fluctuation_strength' implementation
-        fs3b, _, _, time3b = fluctuation_strength(x3b, fs)
+        fs3b, _ = fluctuation_strength(x3b, fs, sb=2048, sh=1024)
         FS_FM3b[i] = np.mean(fs3b)
     
     # normalise to FS of reference tone (70 dB)
     xm_ref3b = np.sin(2*np.pi*4*t)
     x_ref3b = _create_fm_sin(70, fc3b, xm_ref3b, delta_f3b, fs)
-    r_ref3b, _, _, _ = fluctuation_strength(x_ref3b, fs)
+    r_ref3b, _ = fluctuation_strength(x_ref3b, fs, sb=2048, sh=1024)
     FS_FM3b *= 1/np.mean(r_ref3b)
     
     # test for 20% tolerance
@@ -638,14 +636,13 @@ def test5():
         xm5 = np.sin(2*np.pi*fm5*t)
         x5 = _create_fm_sin(L_FM5, fc5, xm5, d, fs)
         
-        # use roughness as a stand-in for future 'fluctuation_strength' implementation
-        fs5, _, _, time5 = fluctuation_strength(x5, fs)
+        fs5, _ = fluctuation_strength(x5, fs, sb=2048, sh=1024)
         FS_FM5[i] = np.mean(fs5)
     
     # normalise to FS of reference tone (200 Hz freq deviation)
     xm_ref5 = np.sin(2*np.pi*4*t)
     x_ref5 = _create_fm_sin(L_FM5, fc5, xm_ref5, 200, fs)
-    r_ref5, _, _, _ = fluctuation_strength(x_ref5, fs)
+    r_ref5, _ = fluctuation_strength(x_ref5, fs, sb=2048, sh=1024)
     FS_FM5 *= 1/np.mean(r_ref5)
   
     # test for 20% tolerance
@@ -722,14 +719,13 @@ def test6():
         xm6 = np.sin(2*np.pi*fm6*t)
         x6 = _create_fm_sin(L_FM6, f, xm6, delta_f6, fs)
         
-        # use roughness as a stand-in for future 'fluctuation_strength' implementation
-        fs6, _, _, time6 = fluctuation_strength(x6, fs)
+        fs6, _ = fluctuation_strength(x6, fs, sb=2048, sh=1024)
         FS_FM6[i] = np.mean(fs6)
     
     # normalise to FS of reference tone (1.5 kHz)
     xm_ref6 = np.sin(2*np.pi*4*t)
     x_ref6 = _create_fm_sin(L_FM6, 1500, xm_ref6, delta_f6, fs)
-    r_ref6, _, _, _ = fluctuation_strength(x_ref6, fs)
+    r_ref6, _ = fluctuation_strength(x_ref6, fs, sb=2048, sh=1024)
     FS_FM6 *= 1/np.mean(r_ref6)
     
     # test for 20% tolerance
