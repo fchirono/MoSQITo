@@ -10,14 +10,16 @@ Author:
 # Standard imports
 import numpy as np
 
-# Local imports
-from mosqito.utils.time_segmentation import time_segmentation
-from mosqito.sound_level_meter.spectrum import spectrum
 
-from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._fluctuation_strength_main_calc import _fluctuation_strength_main_calc
-from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._gzi_weighting import _gzi_weighting
-from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._H_weighting import _H_weighting
+# Project Imports
+from mosqito.sq_metrics.loudness.loudness_ecma._rectified_band_pass_signals import (
+    _rectified_band_pass_signals,
+)
+from mosqito.sq_metrics.loudness.loudness_ecma._nonlinearity import _nonlinearity
 
+# Data import
+# Threshold in quiet
+from mosqito.sq_metrics.loudness.loudness_ecma._loudness_ecma_data import ltq_z
 
 # Optional package import
 try:
@@ -28,12 +30,14 @@ except ImportError:
     DataFreq = None
 
 
-def fluctuation_strength(signal, fs=None, overlap=0.5, is_sdt_output=False):
+def fluctuation_strength(signal, fs, sb, sh):
     """[*WARNING*] Fluctuation Strength calculation of a signal sampled at 48kHz.
 
-    *WARNING*: The code is a stand-in for the Fluctuation Strength calculation.
-    It is currently a direct copy of the Roughness calculation given in the
-    'roughness_dw' function.
+    *************************** WARNING! ************************************
+    
+    * The code is not finished yet, and does not return correct results!    *
+    
+    *************************************************************************
 
 
     Parameters
@@ -42,118 +46,53 @@ def fluctuation_strength(signal, fs=None, overlap=0.5, is_sdt_output=False):
         A time signal in Pa
         
     fs : float, optional
-        Sampling frequency, can be omitted if the input is a DataTime
-        object. Default to None
+        Sampling frequency, in Hz.
         
-    overlap : float
-        Overlapping coefficient for the time windows of 200ms
+    sb: int or list of int
+        Block size.
+        
+    sh: int or list of int
+        Hop size.
 
-
-    Outputs
+    Returns
     -------
-    FS : numpy.array
-        Fluctuation Strength in [vacil].
-        
-    FS_spec : numpy.array
-        Specific Fluctuation Strength over bark axis.
-        
-    bark_axis : numpy.array
-        Frequency axis in [bark].
-        
-    time : numpy.array
-        Time axis in [s].
+    FS_specific: list of numpy.array
+        Specific Fluctuation Strength [vacil per Bark]. Each of the 53 element
+        of the list corresponds to the time-dependent specific fluctuation
+        strength for a given bark band. Can be a ragged array if a different
+        sb/sh are used for each band.
 
+    bark_axis: numpy.array
+        Bark axis
     """
-
-    # Manage input type
-    if DataTime is not None and isinstance(signal, DataTime):
-        time = signal.get_along("time")["time"]
-        fs = 1 / (time[1] - time[0])
-        signal = signal.get_along("time")[signal.symbol]
-
-    # Number of points within each frame according to the time resolution of ~200ms
-    # TODO: adapt for FS calculation!
-    nperseg = int(0.2 * fs)
     
-    # Overlapping segment length
-    noverlap = int(overlap * nperseg)
+    # Computaton of rectified band-pass signals
+    # (section 5.1.2 to 5.1.5 of ECMA-418-2, 2020)
+    block_array_rect = _rectified_band_pass_signals(signal, sb, sh)
+
     
-    # reshaping of the signal according to the overlap and time proportions
-    sig, time = time_segmentation(
-        signal, fs, nperseg=nperseg, noverlap=noverlap, is_ecma=False
-    )
-    
-    if len(sig.shape) == 1:
-        nseg = 1
-    else:
-        nseg = sig.shape[1]
-
-    spec, _ = spectrum(sig, fs, nfft="default", window="blackman", db=False)
-
-    # Frequency axis in Hertz
-    freq_axis = np.arange(1, nperseg // 2 + 1, 1) * (fs / nperseg)
-
-    # Initialization of the weighting functions H and g
-    # TODO: adapt for FS calculation!
-    hWeight = _H_weighting(nperseg, fs)
-    
-    # Aures modulation depth weighting function
-    # TODO: adapt for FS calculation!
-    gzi = _gzi_weighting(np.arange(1, 48, 1) / 2)
-
-    FS = np.zeros((nseg))
-    FS_spec = np.zeros((47, nseg))
-    if len(spec.shape) > 1:
-        for i in range(nseg):
-            FS[i], FS_spec[:, i], bark_axis = _fluctuation_strength_main_calc(
-                spec[:, i], freq_axis, fs, gzi, hWeight
-            )
-    else:
-        FS, FS_spec, bark_axis = _fluctuation_strength_main_calc(
-            spec, freq_axis, fs, gzi, hWeight
+    FS_specific = []
+    for band_number in range(53):
+        # ROOT-MEAN-SQUARE (section 5.1.6)
+        # After the segmentation of the signal into blocks, root-mean square values of each block are calculated
+        # according to Formula 17.
+        rms_block_value = np.sqrt(
+            2 * np.mean(np.array(block_array_rect[band_number]) ** 2, axis=1)
         )
 
-    # print(np.mean(R,axis=0))
+        # NON-LINEARITY (section 5.1.7)
+        # This section covers the other part of the calculations needed to consider the non-linear transformation
+        # of sound pressure to specific loudness that does the the auditory system. After this point, the
+        # computation is done equally to every block in which we have divided our signal.
+        a_prime = _nonlinearity(rms_block_value)
 
-    # Manage SciDataTool output type
-    if is_sdt_output:
-        if DataLinspace is None:
-            raise RuntimeError(
-                "In order to handle Data objects you need the 'SciDataTool' package."
-            )
-        else:
-            bark_data = DataLinspace(
-                name="Critical band rate",
-                unit="Bark",
-                initial=bark_axis[0],
-                final=bark_axis[-1],
-                number=len(bark_axis),
-                include_endpoint=True,
-                normalizations={
-                    "Hz": Norm_func(function=lambda x: 1960 * (x + 0.53) / (26.28 - x))
-                },
-            )
-            time = DataLinspace(
-                name="time",
-                unit="s",
-                initial=time[0],
-                final=time[-1],
-                number=len(time),
-                include_endpoint=True,
-            )
-            FS_spec = DataFreq(
-                name="Specific Fluctuation Strength",
-                symbol="FS",
-                axes=[bark_data, time],
-                values=FS_spec,
-                unit="vacil/Bark",
-            )
-            FS = DataTime(
-                name="Fluctuation Strength",
-                symbol="FS",
-                axes=[time],
-                values=FS,
-                unit="vacil",
-            )
+        # SPECIFIC LOUDNESS CONSIDERING THE THRESHOLD IN QUIET (section 5.1.8)
+        # The next calculation helps us obtain the result for the specific loudness - specific loudness with
+        # consideration of the lower threshold of hearing.
+        a_prime[a_prime < ltq_z[band_number]] = ltq_z[band_number]
+        N_prime = a_prime - ltq_z[band_number]
+        FS_specific.append(N_prime)
 
-    return FS, FS_spec, bark_axis, time
+    bark_axis = np.linspace(0.5, 26.5, num=53, endpoint=True)
+    
+    return FS_specific, bark_axis
