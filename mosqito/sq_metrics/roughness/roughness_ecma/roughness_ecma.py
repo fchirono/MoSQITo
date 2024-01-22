@@ -25,7 +25,7 @@ from mosqito.sq_metrics.loudness.loudness_ecma._ecma_time_segmentation import _e
 from mosqito.sq_metrics.loudness.loudness_ecma._loudness_ecma_data import ltq_z
 
 
-def roughness_ecma(signal, fs, sb=2048, sh=1024):
+def roughness_ecma(signal, fs, sb=16384, sh=4096):
     """[*WARNING*] Roughness calculation of a signal sampled at 48 kHz,
     according to ECMA-418-2, 2nd Ed (2022).
 
