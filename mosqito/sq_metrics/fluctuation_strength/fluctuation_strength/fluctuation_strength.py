@@ -12,16 +12,16 @@ import numpy as np
 
 
 # Project Imports
-from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._band_pass_signals import (
+from mosqito.sq_metrics.loudness.loudness_ecma._band_pass_signals import (
     _band_pass_signals,
 )
-from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._nonlinearity import _nonlinearity
-from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._ecma_time_segmentation import _ecma_time_segmentation
+from mosqito.sq_metrics.loudness.loudness_ecma._nonlinearity import _nonlinearity
+from mosqito.sq_metrics.loudness.loudness_ecma._ecma_time_segmentation import _ecma_time_segmentation
 
 
 # Data import
 # Threshold in quiet
-from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength._loudness_ecma_data import ltq_z
+from mosqito.sq_metrics.loudness.loudness_ecma._loudness_ecma_data import ltq_z
 
 
 def fluctuation_strength(signal, fs, sb=2048, sh=1024):
