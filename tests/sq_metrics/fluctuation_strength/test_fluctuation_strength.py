@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 plt.close('all')
 
 # Local application imports
-from mosqito.sq_metrics import fluctuation_strength, loudness_ecma
+from mosqito.sq_metrics import fluctuation_strength
 
 from mosqito.sq_metrics.fluctuation_strength.utils import (
     _create_am_sin, _create_am_bbn, _create_fm_sin)
