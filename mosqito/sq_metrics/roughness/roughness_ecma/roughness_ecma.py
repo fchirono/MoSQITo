@@ -10,8 +10,9 @@ Author:
 
 # Standard imports
 import numpy as np
-
+import matplotlib.pyplot as plt
 import scipy.signal as ssig
+import scipy.ndimage as sim
 
 # Project Imports
 from mosqito.sq_metrics.loudness.loudness_ecma.loudness_ecma import loudness_ecma
@@ -64,10 +65,12 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # ************************************************************************
     # Preliminary: calculate time-dependent specific loudness N'(l, z)
     
-    
     # N_basis is (53, L)-shaped,, where L is the number of time segments
     N_basis, _ = loudness_ecma(signal, sb, sh)
     N_basis = np.array(N_basis)
+    
+    # Calculate bark scale
+    bark_axis = np.linspace(0.5, 26.5, num=53, endpoint=True)
     
     # ************************************************************************
     # Section 5.1.2 of ECMA-418-2, 2nd Ed (2022)
@@ -166,15 +169,88 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     scaling = np.zeros(N_basis.shape)
     scaling[non_zero] = (N_basis**2)[non_zero] / (N_max * Phi_env_zero)[non_zero]
     
-    # Scaled power spectrum (Eq. 66)
+    # Scaled power spectrum [Eq. 66] - (53, L, sb_)-shaped
     Phi_env = (scaling[:, :, np.newaxis]
                * np.abs(np.fft.fft(hann*p_env_downsampled))**2 )
+    
+    # ------------------------------------------------------------------------
+    # plot scaled power spectrum for one time segment
+    # timestep_to_plot = 8
+    
+    # df_ = fs_/sb_
+    # f = np.linspace(0, fs_ - df_, sb_)[:sb_//2+1]
+    
+    # plt.figure()
+    # plt.pcolormesh(f, bark_axis,
+    #                 10*np.log10(Phi_env[:, timestep_to_plot, :sb_//2+1]))
+    # plt.title(f'Scaled power spectrum of envelopes')
+    # plt.xlabel('Freq [Hz]')
+    # plt.ylabel('Critical band [Bark]')
+    # plt.colorbar()
+    # ------------------------------------------------------------------------
     
     # ************************************************************************
     # Section 7.1.4 of ECMA-418-2, 2nd Ed. (2022)
     
     # Noise reduction of the envelopes
-    print('a')
+    
+    # 1st step: averaging across neighboring bands
+    two_dim_filter = np.array([1/3, 1/3, 1/3])
+    
+    Phi_avg = sim.convolve(Phi_env, two_dim_filter[:, np.newaxis, np.newaxis],
+                           mode='constant', cval=0.)
+    
+    # ------------------------------------------------------------------------
+    # plot averaged power spectrum for one time segment
+    
+    # df_ = fs_/sb_
+    # f = np.linspace(0, fs_ - df_, sb_)[:sb_//2+1]
+    
+    # plt.figure()
+    # plt.pcolormesh(f, bark_axis,
+    #                 10*np.log10(Phi_avg[:, timestep_to_plot, :sb_//2+1]))
+    # plt.title(f'Averaged power spectrum of envelopes')
+    # plt.xlabel('Freq [Hz]')
+    # plt.ylabel('Critical band [Bark]')
+    # plt.colorbar()
+    # ------------------------------------------------------------------------
+    
+    # Sum the averaged Power spectra to get an overview of all the modulation
+    # patterns over time (Eq. 68)
+    s_ = np.sum(Phi_avg, axis=0)
+    
+    # median of 's_(L, k)' between k=2 and k=255
+    s_tilde = np.median(s_[:, 2:256], axis=-1)
+
+    # 's_tilde' becomes small compared to the peaks for modulated signals,
+    # whereas 's_tilde' and the peaks have comparable amplitude for unmodulated
+    # signals
+    
+    delta = 1e-10
+    
+    # k = 0, ..., 511
+    k = np.arange(sb_)
+    
+    # Eq. 71
+    #   --> 's_ / s_tilde' have large ratios for modulated signals
+    w_tilde = (0.0856
+               * (s_ / (s_tilde[:, np.newaxis] + delta))
+               * np.clip(0.1891 * np.exp(0.0120 * k), 0., 1.) )
+    
+    # Eq. 70
+    w_tilde_max = np.max(w_tilde[:, 2:256], axis=-1)
+    
+    w_mask = (w_tilde >= 0.05 * w_tilde_max[:, np.newaxis])
+    
+    w = np.zeros(s_.shape)
+    w[w_mask] = np.clip( w_tilde[w_mask] - 0.1407, 0., 1.)
+    
+    # 'w' tends to 0 for unmodulated signals, and to 1 for modulated signals
+    # --> For white gaussian noise of 80 dB, all weights 'w' become 0 and
+    #   result in a roughness of 0 Asper
+    
+    # weighted, averaged Power Spectra (Eq. 69)
+    Phi_hat = Phi_avg*w
     
     # ************************************************************************
     # Section 7.1.5 of ECMA-418-2, 2nd Ed. (2022)
@@ -200,8 +276,6 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # Calcuation of time-dependent specific roughness
     
     # ************************************************************************
-    # Calculate bark scale
-    
-    bark_axis = np.linspace(0.5, 26.5, num=53, endpoint=True)
+
     
     return bandpass_signals, bark_axis
