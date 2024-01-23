@@ -25,6 +25,8 @@ from mosqito.sq_metrics.loudness.loudness_ecma._ecma_time_segmentation import _e
 # Threshold in quiet
 from mosqito.sq_metrics.loudness.loudness_ecma._loudness_ecma_data import ltq_z
 
+from mosqito.sq_metrics.roughness.roughness_ecma._von_hann import _von_hann
+
 from mosqito.utils.conversion import bark2freq
 
 def roughness_ecma(signal, fs, sb=16384, sh=4096):
