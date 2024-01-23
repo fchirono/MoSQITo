@@ -11,6 +11,7 @@ Author:
 # Standard imports
 import numpy as np
 
+import scipy.signal as ssig
 
 # Project Imports
 from mosqito.sq_metrics.loudness.loudness_ecma._band_pass_signals import (
@@ -24,6 +25,7 @@ from mosqito.sq_metrics.loudness.loudness_ecma._ecma_time_segmentation import _e
 # Threshold in quiet
 from mosqito.sq_metrics.loudness.loudness_ecma._loudness_ecma_data import ltq_z
 
+from mosqito.utils.conversion import bark2freq
 
 def roughness_ecma(signal, fs, sb=16384, sh=4096):
     """[*WARNING*] Roughness calculation of a signal sampled at 48 kHz,
@@ -104,37 +106,54 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     block_array, time_array = _ecma_time_segmentation(bandpass_signals, sb, sh,
                                                       n_new)
     
-    # ************************************************************************
-    # Section 5.1.6 of ECMA-418-2, 2nd Ed. (2022)
-    # Rectification (Eq. 21)
+    # block_array is (53, L, sb)-shaped, where L is number of time segments
+    block_array = np.array(block_array)
     
-    block_array_rect = np.clip(block_array, a_min=0.00, a_max=None)
-
-    # ************************************************************************
-    # Sections 5.1.7 to 5.1.9 of ECMA-418-2, 2nd Ed. (2022)
+    # time_array is (53, L)-shaped
+    time_array = np.array(time_array)
     
-    FS_specific = []
-    for band_number in range(53):
-        # ROOT-MEAN-SQUARE (section 5.1.7)
-        # After the segmentation of the signal into blocks, root-mean square values of each block are calculated
-        # according to Formula 17.
-        rms_block_value = np.sqrt(
-            2 * np.mean(np.array(block_array_rect[band_number]) ** 2, axis=1)
-        )
-
-        # NON-LINEARITY (section 5.1.8)
-        # This section covers the other part of the calculations needed to consider the non-linear transformation
-        # of sound pressure to specific loudness that does the the auditory system. After this point, the
-        # computation is done equally to every block in which we have divided our signal.
-        a_prime = _nonlinearity(rms_block_value)
-
-        # SPECIFIC LOUDNESS CONSIDERING THE THRESHOLD IN QUIET (section 5.1.9)
-        # The next calculation helps us obtain the result for the specific loudness - specific loudness with
-        # consideration of the lower threshold of hearing.
-        a_prime[a_prime < ltq_z[band_number]] = ltq_z[band_number]
-        N_prime = a_prime - ltq_z[band_number]
-        FS_specific.append(N_prime)
-
+    # ************************************************************************
+    # Section 7.1.2 of ECMA-418-2, 2nd Ed. (2022)
+    
+    # Envelope calculation using Hilbert Transform
+    analytic_signal = ssig.hilbert(block_array)
+    p_env = np.abs(analytic_signal)
+    
+    # ------------------------------------------------------------------------
+    # # plot envelope and bandpass signal for one segment
+    
+    # band_to_plot = 35
+    # timestep_to_plot = 8
+    
+    # t = np.linspace(0, (sb-1)/fs, sb)
+    
+    # plt.figure()
+    # plt.plot(t, p_env[band_to_plot, timestep_to_plot, :],
+    #           label='Envelope')
+    # plt.plot(t, block_array[band_to_plot, timestep_to_plot, :], ':',
+    #           label='Bandpass Signal')
+    # plt.legend()
+    # plt.title(f'{band_to_plot} Bark ({bark2freq(band_to_plot)} Hz)')
+    # ------------------------------------------------------------------------
+    
+    # Downsampling by a factor of 32
+    downsampling_factor = 32
+    p_env_downsampled_ = ssig.decimate(p_env, downsampling_factor//4)
+    p_env_downsampled = ssig.decimate(p_env_downsampled_, 4)
+    
+    # new downsampled sampling freq, block size, hop size
+    fs_ = fs//downsampling_factor       # 1500 Hz
+    sb_ = sb//downsampling_factor       # 512 points
+    sh_ = sh//downsampling_factor       # 128 points
+    
+    # ************************************************************************
+    # Section 7.1.3 of ECMA-418-2, 2nd Ed. (2022)
+    
+    # Calculation of scaled power spectrum
+    
+    # ************************************************************************
+    # Calculate bark scale
+    
     bark_axis = np.linspace(0.5, 26.5, num=53, endpoint=True)
     
-    return FS_specific, bark_axis
+    return bandpass_signals, bark_axis
