@@ -117,7 +117,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # Envelope calculation using Hilbert Transform
     analytic_signal = ssig.hilbert(block_array)
-    p_env = np.abs(analytic_signal)
+    p_env = np.abs(analytic_signal)             # Eq. 65   
     
     # ------------------------------------------------------------------------
     # # plot envelope and bandpass signal for one segment
@@ -150,6 +150,34 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # Section 7.1.3 of ECMA-418-2, 2nd Ed. (2022)
     
     # Calculation of scaled power spectrum
+    
+    # ************************************************************************
+    # Section 7.1.4 of ECMA-418-2, 2nd Ed. (2022)
+    
+    # Noise reduction of the envelopes
+    
+    # ************************************************************************
+    # Section 7.1.5 of ECMA-418-2, 2nd Ed. (2022)
+    
+    # Spectral weighting
+    
+    # 7.1.5.1. Peak picking
+    
+    # 7.1.5.2. Weighting of high modulation rates
+    
+    # 7.1.5.3. Estimation of fundamental modulation rate
+    
+    # 7.1.5.4. Weighting of low modulation rates
+    
+    # ************************************************************************
+    # Section 7.1.6 of ECMA-418-2, 2nd Ed. (2022)
+    
+    # Optional entropy weighting based on randomness of the modulation rate
+    
+    # ************************************************************************
+    # Section 7.1.7 of ECMA-418-2, 2nd Ed. (2022)
+    
+    # Calcuation of time-dependent specific roughness
     
     # ************************************************************************
     # Calculate bark scale
