@@ -14,20 +14,14 @@ import numpy as np
 import scipy.signal as ssig
 
 # Project Imports
-from mosqito.sq_metrics.loudness.loudness_ecma._band_pass_signals import (
-    _band_pass_signals,
-)
-from mosqito.sq_metrics.loudness.loudness_ecma._nonlinearity import _nonlinearity
+from mosqito.sq_metrics.loudness.loudness_ecma.loudness_ecma import loudness_ecma
+from mosqito.sq_metrics.loudness.loudness_ecma._band_pass_signals import _band_pass_signals
 from mosqito.sq_metrics.loudness.loudness_ecma._ecma_time_segmentation import _ecma_time_segmentation
-
-
-# Data import
-# Threshold in quiet
-from mosqito.sq_metrics.loudness.loudness_ecma._loudness_ecma_data import ltq_z
 
 from mosqito.sq_metrics.roughness.roughness_ecma._von_hann import _von_hann
 
 from mosqito.utils.conversion import bark2freq
+
 
 def roughness_ecma(signal, fs, sb=16384, sh=4096):
     """[*WARNING*] Roughness calculation of a signal sampled at 48 kHz,
@@ -66,6 +60,14 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     assert fs == 48000, "Sampling frequency 'fs' must be 48 kHz!"
     
     n_samples = signal.shape[0]
+    
+    # ************************************************************************
+    # Preliminary: calculate time-dependent specific loudness N'(l, z)
+    
+    
+    # N_basis is (53, L)-shaped,, where L is the number of time segments
+    N_basis, _ = loudness_ecma(signal, sb, sh)
+    N_basis = np.array(N_basis)
     
     # ************************************************************************
     # Section 5.1.2 of ECMA-418-2, 2nd Ed (2022)
@@ -153,10 +155,26 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # Calculation of scaled power spectrum
     
+    # get Von Hann window coefficients
+    hann = _von_hann()
+    
+    # max Loudness
+    N_max = np.max(N_basis, axis=0)
+    Phi_env_zero = np.sum( (hann*p_env_downsampled)**2 , axis=-1)
+    non_zero = (N_max*Phi_env_zero != 0)
+    
+    scaling = np.zeros(N_basis.shape)
+    scaling[non_zero] = (N_basis**2)[non_zero] / (N_max * Phi_env_zero)[non_zero]
+    
+    # Scaled power spectrum (Eq. 66)
+    Phi_env = (scaling[:, :, np.newaxis]
+               * np.abs(np.fft.fft(hann*p_env_downsampled))**2 )
+    
     # ************************************************************************
     # Section 7.1.4 of ECMA-418-2, 2nd Ed. (2022)
     
     # Noise reduction of the envelopes
+    print('a')
     
     # ************************************************************************
     # Section 7.1.5 of ECMA-418-2, 2nd Ed. (2022)
