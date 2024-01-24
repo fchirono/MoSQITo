@@ -10,7 +10,9 @@ Author:
 
 # Standard imports
 import numpy as np
+
 import matplotlib.pyplot as plt
+
 import scipy.signal as ssig
 import scipy.ndimage as sim
 
@@ -19,6 +21,8 @@ from mosqito.sq_metrics.loudness.loudness_ecma.loudness_ecma import loudness_ecm
 from mosqito.sq_metrics.loudness.loudness_ecma._band_pass_signals import _band_pass_signals
 from mosqito.sq_metrics.loudness.loudness_ecma._ecma_time_segmentation import _ecma_time_segmentation
 
+from mosqito.sq_metrics.roughness.roughness_ecma._beta import _beta
+from mosqito.sq_metrics.roughness.roughness_ecma._error_correction import _error_correction
 from mosqito.sq_metrics.roughness.roughness_ecma._von_hann import _von_hann
 
 from mosqito.utils.conversion import bark2freq
@@ -275,16 +279,19 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # search for local maxima in Phi_hat for k=2, ..., 255
     
+    # for each critical freq...
     for z in range(53):
+        
+        # for each time step...
         for l in range(L):
             
+            # find peaks, calculate their prominence (Numpy definition matches
+            # the definition in ECMA-418-2, 2022)
             peaks, peaks_dict = ssig.find_peaks(Phi_hat[z, l, k_range],
                                                 prominence=[None, None])
             
             # compensate for k_range starting at k=2
             peaks += 2
-            # peaks_dict['left_bases'] += 2
-            # peaks_dict['right_bases'] += 2
             
             # ---------------------------------------------------------------
             # Plot Phi_hat for a given critical freq, time step
@@ -309,10 +316,94 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
             # Check if Phi[peak] > 0.05 * max(Phi[all_peaks]) (Eq. 72)
             peak_is_high = (Phi_hat[z, l, peaks_sorted] > 0.05*np.max(Phi_hat[z, l, peaks_sorted]))
             
-            # for each tall peak, implement a quadratic fit
-            for pk in peaks_sorted[peak_is_high]:
-                # TODO: implement quadratic fit!
-                print(pk)
+            # number of peaks in current critical freq, time step
+            N_peaks = np.sum(peak_is_high)
+            
+            # for each tall peak, implement a quadratic fit to estimate modulation
+            # rate and amplitude
+            f_pi = np.zeros(N_peaks)
+            A_pi = np.zeros(N_peaks)
+            
+            for i, pk in enumerate(peaks_sorted[peak_is_high]):
+                
+                # solution vector (Eq. 74)
+                phi_vec = np.array([Phi_hat[z, l, pk-1],
+                                    Phi_hat[z, l, pk],
+                                    Phi_hat[z, l, pk+1]])
+                
+                # modulation index matrix (Eq. 75)
+                K = np.array([[(pk-1)**2,   (pk-1), 1],
+                              [(pk  )**2,     (pk), 1],
+                              [(pk+1)**2,   (pk+1), 1]])
+                
+                # find vector of unknowns
+                C = np.linalg.solve(K, phi_vec)
+                
+                # first corrected modulation rate
+                delta_f_ = fs_/sb_
+                f_tilde = -C[1]/(2*C[0]) * delta_f_
+                
+                # get values of theta, E(theta)
+                theta, E = _error_correction()
+                
+                beta = _beta(theta, f_tilde, delta_f_, E)
+                
+                theta_min_index = np.argmin(np.abs(beta))
+                
+                # ------------------------------------------------------------
+                # calculate correction factor by linear interpolating E(theta)
+                # as a function of beta(theta) - same result as obtained for
+                # Eqs. 78 (corrected) to 81 
+                
+                rho = np.interp(0, beta, E)
+                
+                # ------------------------------------------------------------
+                # calculate correction factor following Eq. 78 to 81
+                
+                # # Eq. 80
+                # theta_min_i = np.argmin(np.abs(beta))
+                
+                # # Eq. 81
+                # cond1 = (theta[theta_min_i] > 0)
+                # cond2 = (beta[theta_min_i] * beta[theta_min_i-1] < 0)                
+                
+                # if (cond1 and cond2):
+                #     tci = theta_min_i       # tci: theta_corr_index
+                # else:
+                #     tci = theta_min_i + 1
+                
+                # # Eq. 78 as published - WRONG!
+                # rho_ = (E[tci]
+                #         - ( (E[tci] - E[tci-1])*
+                #           beta[tci-1] / (beta[tci] - beta[tci-1])))
+                
+                # # Eq. 78 - corrected to match linear interpolation above
+                # rho_c = (E[tci]
+                #           - ( (E[tci] - E[tci-1])*
+                #             beta[tci] / (beta[tci] - beta[tci-1])))
+                
+                
+                # ------------------------------------------------------------
+                # # plot figure comparing the different values for rho
+                
+                # plt.figure()
+                # plt.plot(beta, E, '^:', markersize=10, label='Table 10, Eq. 79')
+                # plt.plot(0, rho, 'r*', markersize=15, label='np.interp')
+                # plt.plot(0, rho_, 'bs', markersize=12, label='Eq. 78 (published)')
+                # plt.plot(0, rho_c, 'mo', markersize=8, label='Eq. 78 (corrected)')
+                # plt.grid()
+                # plt.xlabel('beta(theta)')
+                # plt.ylabel('E(theta)')
+                # plt.legend()
+                
+                # ------------------------------------------------------------
+                
+                # Corrected modulation rate (Eq. 77)
+                f_pi[i] = f_tilde + rho
+                
+                # Peak amplitude (Eq. 82)
+                pk_range = np.array([pk-1, pk, pk+1])
+                A_pi[i] = np.sum(Phi_hat[z, l, pk_range])
                 
             
     # 7.1.5.2. Weighting of high modulation rates
