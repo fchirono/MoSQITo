@@ -66,11 +66,10 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # Preliminary: calculate time-dependent specific loudness N'(l, z)
     
     # N_basis is (53, L)-shaped,, where L is the number of time segments
-    N_basis, _ = loudness_ecma(signal, sb, sh)
+    N_basis, bark_axis = loudness_ecma(signal, sb, sh)
     N_basis = np.array(N_basis)
     
-    # Calculate bark scale
-    bark_axis = np.linspace(0.5, 26.5, num=53, endpoint=True)
+    L = N_basis.shape[1]
     
     # ************************************************************************
     # Section 5.1.2 of ECMA-418-2, 2nd Ed (2022)
@@ -122,9 +121,9 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # ************************************************************************
     # Section 7.1.2 of ECMA-418-2, 2nd Ed. (2022)
     
-    # Envelope calculation using Hilbert Transform
+    # Envelope calculation using Hilbert Transform (Eq. 65)
     analytic_signal = ssig.hilbert(block_array)
-    p_env = np.abs(analytic_signal)             # Eq. 65   
+    p_env = np.abs(analytic_signal)
     
     # ------------------------------------------------------------------------
     # # plot envelope and bandpass signal for one segment
@@ -220,7 +219,8 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     s_ = np.sum(Phi_avg, axis=0)
     
     # median of 's_(L, k)' between k=2 and k=255
-    s_tilde = np.median(s_[:, 2:256], axis=-1)
+    k_range = np.arange(2, 256)
+    s_tilde = np.median(s_[:, k_range], axis=-1)
 
     # 's_tilde' becomes small compared to the peaks for modulated signals,
     # whereas 's_tilde' and the peaks have comparable amplitude for unmodulated
@@ -238,7 +238,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
                * np.clip(0.1891 * np.exp(0.0120 * k), 0., 1.) )
     
     # Eq. 70
-    w_tilde_max = np.max(w_tilde[:, 2:256], axis=-1)
+    w_tilde_max = np.max(w_tilde[:, k_range], axis=-1)
     
     w_mask = (w_tilde >= 0.05 * w_tilde_max[:, np.newaxis])
     
@@ -248,6 +248,20 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # 'w' tends to 0 for unmodulated signals, and to 1 for modulated signals
     # --> For white gaussian noise of 80 dB, all weights 'w' become 0 and
     #   result in a roughness of 0 Asper
+    
+    # ------------------------------------------------------------------------
+    # plot weighting value 'w' for one time segment
+    
+    df_ = fs_/sb_
+    f = np.linspace(0, fs_ - df_, sb_)[:sb_//2+1]
+    
+    plt.figure()
+    plt.pcolormesh(f, time_array[0, :], w[:, :sb_//2+1])
+    plt.title(f"Weighting coefficient 'w' (Eq. 70)")
+    plt.xlabel('Freq [Hz]')
+    plt.ylabel('Time step [s]')
+    plt.colorbar()
+    # ------------------------------------------------------------------------
     
     # weighted, averaged Power Spectra (Eq. 69)
     Phi_hat = Phi_avg*w
@@ -259,6 +273,48 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # 7.1.5.1. Peak picking
     
+    # search for local maxima in Phi_hat for k=2, ..., 255
+    
+    for z in range(53):
+        for l in range(L):
+            
+            peaks, peaks_dict = ssig.find_peaks(Phi_hat[z, l, k_range],
+                                                prominence=[None, None])
+            
+            # compensate for k_range starting at k=2
+            peaks += 2
+            # peaks_dict['left_bases'] += 2
+            # peaks_dict['right_bases'] += 2
+            
+            # ---------------------------------------------------------------
+            # Plot Phi_hat for a given critical freq, time step
+            
+            # z = 40
+            # l = 8
+            
+            # plt.figure()
+            # plt.plot(Phi_hat[z, l, :sb_//2+1], label='Phi hat')
+            # plt.plot(peaks, Phi_hat[z, l, peaks], 'r*', label='Peaks')
+            # plt.title(f"Critical freq {bark_axis[z]} Bark, time step {time_array[z, l]:.2f} s")
+            # plt.legend()
+            # ---------------------------------------------------------------
+            
+            # sort peak indices based on their prominences, from smallest to
+            # largest prominence, and pick up to 10 highest
+            sort_indices = np.argsort(peaks_dict['prominences'])[-10:]
+            
+            # get peak indices sorted by increasing prominence
+            peaks_sorted = peaks[sort_indices]
+            
+            # Check if Phi[peak] > 0.05 * max(Phi[all_peaks]) (Eq. 72)
+            peak_is_high = (Phi_hat[z, l, peaks_sorted] > 0.05*np.max(Phi_hat[z, l, peaks_sorted]))
+            
+            # for each tall peak, implement a quadratic fit
+            for pk in peaks_sorted[peak_is_high]:
+                # TODO: implement quadratic fit!
+                print(pk)
+                
+            
     # 7.1.5.2. Weighting of high modulation rates
     
     # 7.1.5.3. Estimation of fundamental modulation rate
