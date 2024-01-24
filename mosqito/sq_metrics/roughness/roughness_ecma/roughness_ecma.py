@@ -164,20 +164,23 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # get Von Hann window coefficients
     hann = _von_hann()
     
-    # max Loudness
+    # max Loudness (Eq. 67)
     N_max = np.max(N_basis, axis=0)
     Phi_env_zero = np.sum( (hann*p_env_downsampled)**2 , axis=-1)
-    non_zero = (N_max*Phi_env_zero != 0)
     
+    
+    # Scaled power spectrum (Eq. 66)
     scaling = np.zeros(N_basis.shape)
+    non_zero = (N_max*Phi_env_zero != 0)
     scaling[non_zero] = (N_basis**2)[non_zero] / (N_max * Phi_env_zero)[non_zero]
     
-    # Scaled power spectrum [Eq. 66] - (53, L, sb_)-shaped
+    #   'Phi_env' is (53, L, sb_)-shaped
     Phi_env = (scaling[:, :, np.newaxis]
                * np.abs(np.fft.fft(hann*p_env_downsampled))**2 )
     
     # ------------------------------------------------------------------------
     # plot scaled power spectrum for one time segment
+    
     # timestep_to_plot = 8
     
     # df_ = fs_/sb_
@@ -197,11 +200,13 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # Noise reduction of the envelopes
     
-    # 1st step: averaging across neighboring bands
+    # averaging across neighboring critical bands
     two_dim_filter = np.array([1/3, 1/3, 1/3])
     
-    Phi_avg = sim.convolve(Phi_env, two_dim_filter[:, np.newaxis, np.newaxis],
-                           mode='constant', cval=0.)
+    Phi_avg = sim.convolve(Phi_env,
+                           two_dim_filter[:, np.newaxis, np.newaxis],
+                           mode='constant',
+                           cval=0.)
     
     # ------------------------------------------------------------------------
     # plot averaged power spectrum for one time segment
@@ -243,7 +248,6 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # Eq. 70
     w_tilde_max = np.max(w_tilde[:, k_range], axis=-1)
-    
     w_mask = (w_tilde >= 0.05 * w_tilde_max[:, np.newaxis])
     
     w = np.zeros(s_.shape)
@@ -256,15 +260,15 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # ------------------------------------------------------------------------
     # plot weighting value 'w' for one time segment
     
-    df_ = fs_/sb_
-    f = np.linspace(0, fs_ - df_, sb_)[:sb_//2+1]
+    # df_ = fs_/sb_
+    # f = np.linspace(0, fs_ - df_, sb_)[:sb_//2+1]
     
-    plt.figure()
-    plt.pcolormesh(f, time_array[0, :], w[:, :sb_//2+1])
-    plt.title(f"Weighting coefficient 'w' (Eq. 70)")
-    plt.xlabel('Freq [Hz]')
-    plt.ylabel('Time step [s]')
-    plt.colorbar()
+    # plt.figure()
+    # plt.pcolormesh(f, time_array[0, :], w[:, :sb_//2+1])
+    # plt.title(f"Weighting coefficient 'w' (Eq. 70)")
+    # plt.xlabel('Freq [Hz]')
+    # plt.ylabel('Time step [s]')
+    # plt.colorbar()
     # ------------------------------------------------------------------------
     
     # weighted, averaged Power Spectra (Eq. 69)
@@ -350,47 +354,43 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
                 
                 theta_min_index = np.argmin(np.abs(beta))
                 
-                # ------------------------------------------------------------
-                # calculate correction factor by linear interpolating E(theta)
-                # as a function of beta(theta) - same result as obtained for
-                # Eqs. 78 (corrected) to 81 
-                
-                rho = np.interp(0, beta, E)
-                
-                # ------------------------------------------------------------
+                # ------------------------------------------------------------            
                 # calculate correction factor following Eq. 78 to 81
                 
-                # # Eq. 80
-                # theta_min_i = np.argmin(np.abs(beta))
+                # Eq. 80
+                theta_min_i = np.argmin(np.abs(beta))
                 
-                # # Eq. 81
-                # cond1 = (theta[theta_min_i] > 0)
-                # cond2 = (beta[theta_min_i] * beta[theta_min_i-1] < 0)                
+                # Eq. 81
+                cond1 = (theta[theta_min_i] > 0)
+                cond2 = (beta[theta_min_i] * beta[theta_min_i-1] < 0)                
                 
-                # if (cond1 and cond2):
-                #     tci = theta_min_i       # tci: theta_corr_index
-                # else:
-                #     tci = theta_min_i + 1
+                if (cond1 and cond2):
+                    tci = theta_min_i       # tci: theta_corr_index
+                else:
+                    tci = theta_min_i + 1
                 
-                # # Eq. 78 as published - WRONG!
-                # rho_ = (E[tci]
-                #         - ( (E[tci] - E[tci-1])*
-                #           beta[tci-1] / (beta[tci] - beta[tci-1])))
+                # Eq. 78 as published - WRONG!
+                rho_ = (E[tci]
+                        - ( (E[tci] - E[tci-1])*
+                          beta[tci-1] / (beta[tci] - beta[tci-1])))
                 
-                # # Eq. 78 - corrected to match linear interpolation above
-                # rho_c = (E[tci]
-                #           - ( (E[tci] - E[tci-1])*
-                #             beta[tci] / (beta[tci] - beta[tci-1])))
+                # Eq. 78 - corrected
+                rho = (E[tci]
+                        - ( (E[tci] - E[tci-1])*
+                          beta[tci] / (beta[tci] - beta[tci-1])))
                 
                 
                 # ------------------------------------------------------------
                 # # plot figure comparing the different values for rho
                 
+                # # interpolate using numpy
+                # rho_np = np.interp(0, beta, E)
+                
                 # plt.figure()
                 # plt.plot(beta, E, '^:', markersize=10, label='Table 10, Eq. 79')
-                # plt.plot(0, rho, 'r*', markersize=15, label='np.interp')
+                # plt.plot(0, rho_np, 'r*', markersize=15, label='np.interp')
                 # plt.plot(0, rho_, 'bs', markersize=12, label='Eq. 78 (published)')
-                # plt.plot(0, rho_c, 'mo', markersize=8, label='Eq. 78 (corrected)')
+                # plt.plot(0, rho, 'mo', markersize=8, label='Eq. 78 (corrected)')
                 # plt.grid()
                 # plt.xlabel('beta(theta)')
                 # plt.ylabel('E(theta)')
