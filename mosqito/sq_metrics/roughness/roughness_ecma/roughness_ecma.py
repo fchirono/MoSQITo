@@ -20,6 +20,7 @@ import scipy.ndimage as sim
 from mosqito.sq_metrics.loudness.loudness_ecma.loudness_ecma import loudness_ecma
 from mosqito.sq_metrics.loudness.loudness_ecma._band_pass_signals import _band_pass_signals
 from mosqito.sq_metrics.loudness.loudness_ecma._ecma_time_segmentation import _ecma_time_segmentation
+from mosqito.sq_metrics.loudness.loudness_ecma._auditory_filters_centre_freq import _auditory_filters_centre_freq
 
 from mosqito.sq_metrics.roughness.roughness_ecma._beta import _beta
 from mosqito.sq_metrics.roughness.roughness_ecma._error_correction import _error_correction
@@ -74,6 +75,8 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     N_basis = np.array(N_basis)
     
     L = N_basis.shape[1]
+    
+    F = _auditory_filters_centre_freq()
     
     # ************************************************************************
     # Section 5.1.2 of ECMA-418-2, 2nd Ed (2022)
@@ -289,8 +292,10 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
         # for each time step...
         for l in range(L):
             
-            # find peaks, calculate their prominence (Numpy definition matches
-            # the definition in ECMA-418-2, 2022)
+            # TODO: code might not find any peaks!
+            
+            # find peaks, calculate their prominence (Scipy definition of
+            # prominence matches the definition in ECMA-418-2, 2022)
             peaks, peaks_dict = ssig.find_peaks(Phi_hat[z, l, k_range],
                                                 prominence=[None, None])
             
@@ -369,7 +374,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
                 else:
                     tci = theta_min_i + 1
                 
-                # Eq. 78 as published - WRONG!
+                # Eq. 78 as published - THIS IS WRONG!
                 rho_ = (E[tci]
                         - ( (E[tci] - E[tci-1])*
                           beta[tci-1] / (beta[tci] - beta[tci-1])))
@@ -380,11 +385,12 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
                           beta[tci] / (beta[tci] - beta[tci-1])))
                 
                 
+                # # This entire approach is identical to interpolating using
+                # # numpy
+                # rho_np = np.interp(0, beta, E)
+                
                 # ------------------------------------------------------------
                 # # plot figure comparing the different values for rho
-                
-                # # interpolate using numpy
-                # rho_np = np.interp(0, beta, E)
                 
                 # plt.figure()
                 # plt.plot(beta, E, '^:', markersize=10, label='Table 10, Eq. 79')
@@ -401,12 +407,48 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
                 # Corrected modulation rate (Eq. 77)
                 f_pi[i] = f_tilde + rho
                 
-                # Peak amplitude (Eq. 82)
+                # Peak amplitudes (Eq. 82)
                 pk_range = np.array([pk-1, pk, pk+1])
                 A_pi[i] = np.sum(Phi_hat[z, l, pk_range])
                 
             
-    # 7.1.5.2. Weighting of high modulation rates
+            # ------------------------------------------------------------
+            # 7.1.5.2. Weighting of high modulation rates
+            
+            q1 = 1.2822
+            
+            # Eq. 87
+            if F[z]/1000. < 2**(-3.4253):
+                q2 = 0.2471
+            else:
+                q2 = 0.2471 + 0.0129 * (np.log2(F[z]/1000.) + 3.4253)**2
+                
+            # 'f_max' is the modulation rate at which the weighting factor G
+            # reaches a maximum of 1 (Eq. 86)
+            f_max = 72.6937 * (1. - 1.1739*np.exp( -5.4583 * F[z] / 1000. ))
+                             
+            # Parameters for r_max (Table 11)
+            if F[z] < 1000.:
+                r1 = 0.3560
+                r2 = 0.8049
+            else:
+                r1 = 0.8024
+                r2 = 0.9333
+            
+            # scaling factor r_max (Eq. 84)
+            r_max = 1. / (1. + r1 * np.abs( np.log2(F[z]/1000.) )**r2 )
+            
+            # weighting factor G (Eq. 85)
+            f1 = f_pi/f_max
+            f2 = f_max/f_pi
+            arg1 = ((f1 - f2) * q1)**2
+            
+            G = 1. / ((1. + arg1)**q2 )
+            
+            # Weighted peaks' amplitudes (Eq. 83)
+            A_pi_tilde = A_pi * r_max
+            A_pi_tilde[ f_pi >= f_max ] *= G[f_pi >= f_max]
+            
     
     # 7.1.5.3. Estimation of fundamental modulation rate
     
