@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Implements the peak picking functions in Section 7.1.5 of
+Implements the peak picking functions in Section 7.1.5.1 of
 ECMA-418-2 (2nd Ed, 2022) standard, used for calculating Roughness.
 
 Author:
@@ -20,7 +20,7 @@ def _peak_picking(Phi_hat_z_l, fs_):
     Implements the peak picking functions in Section 7.1.5.1 of
     ECMA-418-2 (2nd Ed, 2022) standard for calculating Roughness. It takes an
     array of noise-reduced, downsampled power spectrum values for one critical
-    frequency 'z' and one time step 'l', finds 'N_tall_peaks' maxima that
+    frequency 'z' and one time step 'l', finds 'N_peaks' maxima that
     fulfill certain conditons, and estimates the frequencies and amplitudes of
     these maxima.
     
@@ -35,10 +35,10 @@ def _peak_picking(Phi_hat_z_l, fs_):
     
     Returns
     -------
-    f_pi : (N_tall_peaks,)-shaped numpy.array
+    f_pi : (N_peaks,)-shaped numpy.array
         Estimated modulation frequencies for all maxima in 'Phi_hat_z_l'
     
-    A_pi : (N_tall_peaks,)-shaped numpy.array
+    A_pi : (N_peaks,)-shaped numpy.array
         Estimated amplitudes for all maxima in 'Phi_hat_z_l'
     """
     
@@ -57,11 +57,11 @@ def _peak_picking(Phi_hat_z_l, fs_):
     phi_peaks += 2
     
     # ---------------------------------------------------------------
-    # Plot Phi_hat for a given critical freq, time step
+    # Plot Phi_hat
     
     # plt.figure()
-    # plt.plot(Phi_hat[z, l, :sb_//2+1], label='Phi hat')
-    # plt.plot(phi_peaks, Phi_hat[z, l, phi_peaks], 'r*', label='Peaks')
+    # plt.plot(Phi_hat_z_l[:sb_//2+1], label='Phi hat')
+    # plt.plot(phi_peaks, Phi_hat_z_l[phi_peaks], 'r*', label='Peaks')
     # plt.title(f"Critical freq {bark_axis[z]} Bark, time step {time_array[z, l]:.2f} s")
     # plt.legend()
     # ---------------------------------------------------------------
