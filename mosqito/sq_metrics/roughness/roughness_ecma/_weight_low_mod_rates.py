@@ -1,0 +1,57 @@
+# -*- coding: utf-8 -*-
+"""
+Implements the weghting of low modulation rates in Section 7.1.5.4 of
+ECMA-418-2 (2nd Ed, 2022) standard, used for calculating Roughness.
+
+Author:
+    Fabio Casagrande Hirono
+    Jan 2024
+"""
+
+import numpy as np
+
+from mosqito.sq_metrics.roughness.roughness_ecma._f_max import _f_max
+from mosqito.sq_metrics.roughness.roughness_ecma._weight_factor_G import _weight_factor_G
+
+def _weight_low_mod_rates(f_pi_hat, A_hat, F_z):
+    """
+    Implements the weighting of low modulation rates in Eqs. 95 to 96 of 
+    Section 7.1.5.2 of ECMA-418-2 (2nd Ed, 2022) standard for calculating
+    Roughness.
+    
+    Parameters
+    ----------
+    f_pi_hat : (N_peaks,)-shaped numpy.array
+        Estimated fundamental modulation rates
+    
+    A_hat : (N_peaks)-shaped numpy.array
+        Estimated amplitudes of maxima in 'Phi_hat_z_l'
+    
+    F_z : int
+        Centre frequency of the current critical frequency band.
+    
+    Returns
+    -------
+    A_pi_tilde : (N_peaks,)-shaped numpy.array
+        Weighted amplitudes of 'N_peaks' maxima in 'Phi_hat_z_l'
+    """
+
+    
+    q1_low = 0.7066
+    
+    # Eq. 96
+    q2_low = 1.0967 - 0.0640 * np.log2(F_z/1000.)
+        
+    # 'f_max' is the modulation rate at which the weighting factor G
+    # reaches a maximum of 1 (Eq. 86)
+    f_max = _f_max(F_z)
+    
+    # weighting factor G (Eq. 85)
+    G = _weight_factor_G(f_pi_hat, f_max, q1_low, q2_low)
+    
+    # Weighted peaks' amplitudes (Eq. 83)
+    A = A_pi * r_max
+    A[ f_pi >= f_max ] *= G[f_pi >= f_max]
+            
+    return A
+            

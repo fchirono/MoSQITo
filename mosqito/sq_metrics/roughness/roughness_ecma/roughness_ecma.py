@@ -234,7 +234,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
             
             # ------------------------------------------------------------
             # 7.1.5.4. Weighting of low modulation rates
-            
+            A = _weight_low_mod_rates(f_pi_hat, A_hat, F[z])
     
     # ************************************************************************
     # Section 7.1.6 of ECMA-418-2, 2nd Ed. (2022)
