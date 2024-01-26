@@ -14,7 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import scipy.signal as ssig
-import scipy.ndimage as sim
+
 
 # Project Imports
 from mosqito.sq_metrics.loudness.loudness_ecma.loudness_ecma import loudness_ecma
@@ -25,6 +25,7 @@ from mosqito.sq_metrics.loudness.loudness_ecma._auditory_filters_centre_freq imp
 from mosqito.sq_metrics.roughness.roughness_ecma._beta import _beta
 from mosqito.sq_metrics.roughness.roughness_ecma._error_correction import _error_correction
 from mosqito.sq_metrics.roughness.roughness_ecma._von_hann import _von_hann
+from mosqito.sq_metrics.roughness.roughness_ecma._env_noise_reduction import _env_noise_reduction
 
 from mosqito.utils.conversion import bark2freq
 
@@ -201,81 +202,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # ************************************************************************
     # Section 7.1.4 of ECMA-418-2, 2nd Ed. (2022)
     
-    # Noise reduction of the envelopes
-    
-    # averaging across neighboring critical bands
-    two_dim_filter = np.array([1/3, 1/3, 1/3])
-    
-    Phi_avg = sim.convolve(Phi_env,
-                           two_dim_filter[:, np.newaxis, np.newaxis],
-                           mode='constant',
-                           cval=0.)
-    
-    # ------------------------------------------------------------------------
-    # plot averaged power spectrum for one time segment
-    
-    # df_ = fs_/sb_
-    # f = np.linspace(0, fs_ - df_, sb_)[:sb_//2+1]
-    
-    # plt.figure()
-    # plt.pcolormesh(f, bark_axis,
-    #                 10*np.log10(Phi_avg[:, timestep_to_plot, :sb_//2+1]))
-    # plt.title(f'Averaged power spectrum of envelopes')
-    # plt.xlabel('Freq [Hz]')
-    # plt.ylabel('Critical band [Bark]')
-    # plt.colorbar()
-    # ------------------------------------------------------------------------
-    
-    # Sum the averaged Power spectra to get an overview of all the modulation
-    # patterns over time (Eq. 68)
-    s_ = np.sum(Phi_avg, axis=0)
-    
-    # median of 's_(L, k)' between k=2 and k=255
-    k_range = np.arange(2, 256)
-    s_tilde = np.median(s_[:, k_range], axis=-1)
-
-    # 's_tilde' becomes small compared to the peaks for modulated signals,
-    # whereas 's_tilde' and the peaks have comparable amplitude for unmodulated
-    # signals
-    
-    delta = 1e-10
-    
-    # k = 0, ..., 511
-    k = np.arange(sb_)
-    
-    # Eq. 71
-    #   --> 's_ / s_tilde' have large ratios for modulated signals
-    w_tilde = (0.0856
-               * (s_ / (s_tilde[:, np.newaxis] + delta))
-               * np.clip(0.1891 * np.exp(0.0120 * k), 0., 1.) )
-    
-    # Eq. 70
-    w_tilde_max = np.max(w_tilde[:, k_range], axis=-1)
-    w_mask = (w_tilde >= 0.05 * w_tilde_max[:, np.newaxis])
-    
-    w = np.zeros(s_.shape)
-    w[w_mask] = np.clip( w_tilde[w_mask] - 0.1407, 0., 1.)
-    
-    # 'w' tends to 0 for unmodulated signals, and to 1 for modulated signals
-    # --> For white gaussian noise of 80 dB, all weights 'w' become 0 and
-    #   result in a roughness of 0 Asper
-    
-    # ------------------------------------------------------------------------
-    # plot weighting value 'w' for one time segment
-    
-    # df_ = fs_/sb_
-    # f = np.linspace(0, fs_ - df_, sb_)[:sb_//2+1]
-    
-    # plt.figure()
-    # plt.pcolormesh(f, time_array[0, :], w[:, :sb_//2+1])
-    # plt.title(f"Weighting coefficient 'w' (Eq. 70)")
-    # plt.xlabel('Freq [Hz]')
-    # plt.ylabel('Time step [s]')
-    # plt.colorbar()
-    # ------------------------------------------------------------------------
-    
-    # weighted, averaged Power Spectra (Eq. 69)
-    Phi_hat = Phi_avg*w
+    Phi_hat = _env_noise_reduction(Phi_env)
     
     # ************************************************************************
     # Section 7.1.5 of ECMA-418-2, 2nd Ed. (2022)
@@ -294,23 +221,24 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
             
             # TODO: code might not find any peaks!
             
+            # # dummy values
+            # z = 40
+            # l = 8
+            
             # find peaks, calculate their prominence (Scipy definition of
             # prominence matches the definition in ECMA-418-2, 2022)
-            peaks, peaks_dict = ssig.find_peaks(Phi_hat[z, l, k_range],
+            phi_peaks, peaks_dict = ssig.find_peaks(Phi_hat[z, l, k_range],
                                                 prominence=[None, None])
             
             # compensate for k_range starting at k=2
-            peaks += 2
+            phi_peaks += 2
             
             # ---------------------------------------------------------------
             # Plot Phi_hat for a given critical freq, time step
             
-            # z = 40
-            # l = 8
-            
             # plt.figure()
             # plt.plot(Phi_hat[z, l, :sb_//2+1], label='Phi hat')
-            # plt.plot(peaks, Phi_hat[z, l, peaks], 'r*', label='Peaks')
+            # plt.plot(phi_peaks, Phi_hat[z, l, phi_peaks], 'r*', label='Peaks')
             # plt.title(f"Critical freq {bark_axis[z]} Bark, time step {time_array[z, l]:.2f} s")
             # plt.legend()
             # ---------------------------------------------------------------
@@ -320,20 +248,22 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
             sort_indices = np.argsort(peaks_dict['prominences'])[-10:]
             
             # get peak indices sorted by increasing prominence
-            peaks_sorted = peaks[sort_indices]
+            phi_peaks_sorted = phi_peaks[sort_indices]
             
             # Check if Phi[peak] > 0.05 * max(Phi[all_peaks]) (Eq. 72)
-            peak_is_high = (Phi_hat[z, l, peaks_sorted] > 0.05*np.max(Phi_hat[z, l, peaks_sorted]))
+            peak_is_tall = (Phi_hat[z, l, phi_peaks_sorted]
+                            > 0.05*np.max(Phi_hat[z, l, phi_peaks_sorted]))
             
-            # number of peaks in current critical freq, time step
-            N_peaks = np.sum(peak_is_high)
+            
+            # list of tall peaks in current critical freq, time step
+            tall_peaks = phi_peaks_sorted[peak_is_tall]
             
             # for each tall peak, implement a quadratic fit to estimate modulation
             # rate and amplitude
-            f_pi = np.zeros(N_peaks)
-            A_pi = np.zeros(N_peaks)
+            f_pi = np.zeros(tall_peaks.shape[0])
+            A_pi = np.zeros(tall_peaks.shape[0])
             
-            for i, pk in enumerate(peaks_sorted[peak_is_high]):
+            for i, pk in enumerate(tall_peaks):
                 
                 # solution vector (Eq. 74)
                 phi_vec = np.array([Phi_hat[z, l, pk-1],
@@ -356,8 +286,6 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
                 theta, E = _error_correction()
                 
                 beta = _beta(theta, f_tilde, delta_f_, E)
-                
-                theta_min_index = np.argmin(np.abs(beta))
                 
                 # ------------------------------------------------------------            
                 # calculate correction factor following Eq. 78 to 81
@@ -385,8 +313,8 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
                           beta[tci] / (beta[tci] - beta[tci-1])))
                 
                 
-                # # This entire approach is identical to interpolating using
-                # # numpy
+                # # This entire approach (Eqs. 78 to 81) is identical to
+                # # linear interpolation using Numpy
                 # rho_np = np.interp(0, beta, E)
                 
                 # ------------------------------------------------------------
@@ -449,8 +377,10 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
             A_pi_tilde = A_pi * r_max
             A_pi_tilde[ f_pi >= f_max ] *= G[f_pi >= f_max]
             
-    
-    # 7.1.5.3. Estimation of fundamental modulation rate
+            # ------------------------------------------------------------
+            # 7.1.5.3. Estimation of fundamental modulation rate
+            
+                    
     
     # 7.1.5.4. Weighting of low modulation rates
     
