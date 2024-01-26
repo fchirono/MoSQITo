@@ -82,7 +82,6 @@ def _peak_picking(Phi_hat_z_l, fs_):
         peak_is_tall = (Phi_hat_z_l[phi_peaks_sorted]
                         > 0.05*np.max(Phi_hat_z_l[phi_peaks_sorted]))
         
-        
         # list of peaks in current critical freq, time step that match criteria
         tall_peaks = phi_peaks_sorted[peak_is_tall]
         

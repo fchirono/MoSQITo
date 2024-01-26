@@ -10,6 +10,9 @@ Author:
 
 import numpy as np
 
+from mosqito.sq_metrics.roughness.roughness_ecma._f_max import _f_max
+
+
 def _weight_high_mod_rates(f_pi, A_pi, F_z):
     """
     Implements the weighting of high modulation rates in Eqs. 83 to 86 of 
@@ -45,7 +48,7 @@ def _weight_high_mod_rates(f_pi, A_pi, F_z):
         
     # 'f_max' is the modulation rate at which the weighting factor G
     # reaches a maximum of 1 (Eq. 86)
-    f_max = 72.6937 * (1. - 1.1739*np.exp( -5.4583 * F_z / 1000. ))
+    f_max = _f_max(F_z)
                      
     # Parameters for r_max (Table 11)
     if F_z < 1000.:
