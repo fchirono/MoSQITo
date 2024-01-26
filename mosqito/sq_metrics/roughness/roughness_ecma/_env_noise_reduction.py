@@ -18,6 +18,7 @@ def _env_noise_reduction(Phi_env):
     ECMA-418-2 (2nd Ed, 2022) standard, used for calculating Roughness. By
     default, 'sb_' = 512.
     
+    
     Parameters
     ----------
     Phi_env : (53, L, sb_)-shaped numpy.array

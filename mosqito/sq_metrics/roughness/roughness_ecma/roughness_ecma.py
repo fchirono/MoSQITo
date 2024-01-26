@@ -78,10 +78,11 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     L = N_basis.shape[1]
     
+    # get centre frequencies of auditory filters
     F = _auditory_filters_centre_freq()
     
     # ************************************************************************
-    # Section 5.1.2 of ECMA-418-2, 2nd Ed (2022)
+    # 5.1.2 Windowing function, zero-padding
     
     # -----------------------------------------------------------------------    
     # Apply windowing function to first 5 ms (240 samples)
@@ -109,15 +110,13 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
                               np.zeros(n_zeros_end)))
     
     # ************************************************************************
-    # Sections 5.1.3 to 5.1.4 of ECMA-418-2, 2nd Ed. (2022)
+    # 5.1.3, 5.1.4 Computaton of band-pass signals
     
-    # Computaton of band-pass signals
     bandpass_signals = _band_pass_signals(signal)
 
     # ************************************************************************
-    # Section 5.1.5 of ECMA-418-2, 2nd Ed. (2022)
+    # 5.1.5 Segmentation into blocks
     
-    # segmentation into blocks
     block_array, time_array = _ecma_time_segmentation(bandpass_signals, sb, sh,
                                                       n_new)
     
@@ -128,7 +127,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     time_array = np.array(time_array)
     
     # ************************************************************************
-    # Section 7.1.2 of ECMA-418-2, 2nd Ed. (2022)
+    # 7.1.2 Envelope calculation
     
     # Envelope calculation using Hilbert Transform (Eq. 65)
     analytic_signal = ssig.hilbert(block_array)
@@ -162,9 +161,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     sh_ = sh//downsampling_factor       # 128 points
     
     # ************************************************************************
-    # Section 7.1.3 of ECMA-418-2, 2nd Ed. (2022)
-    
-    # Calculation of scaled power spectrum
+    # 7.1.3 Calculation of scaled power spectrum
     
     # get Von Hann window coefficients
     hann = _von_hann()
@@ -173,13 +170,12 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     N_max = np.max(N_basis, axis=0)
     Phi_env_zero = np.sum( (hann*p_env_downsampled)**2 , axis=-1)
     
-    
     # Scaled power spectrum (Eq. 66)
     scaling = np.zeros(N_basis.shape)
     non_zero = (N_max*Phi_env_zero != 0)
     scaling[non_zero] = (N_basis**2)[non_zero] / (N_max * Phi_env_zero)[non_zero]
     
-    #   'Phi_env' is (53, L, sb_)-shaped
+    # 'Phi_env' is (53, L, sb_)-shaped
     Phi_env = (scaling[:, :, np.newaxis]
                * np.abs(np.fft.fft(hann*p_env_downsampled))**2 )
     
@@ -201,48 +197,44 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # ------------------------------------------------------------------------
     
     # ************************************************************************
-    # Section 7.1.4 of ECMA-418-2, 2nd Ed. (2022)
+    # 7.1.4 Envelope noise reduction
     
     Phi_hat = _env_noise_reduction(Phi_env)
     
     # ************************************************************************
-    # Section 7.1.5 of ECMA-418-2, 2nd Ed. (2022)
+    # 7.1.5 Spectral weighting
     
-    # Spectral weighting
+    A = np.zeros((53, L))
     
-    # for each critical freq...
+    # for each critical freq 'z', time step 'l'...
     for z in range(53):
-        
-        # for each time step...
         for l in range(L):
-            
-            # TODO: code might not find any peaks!
-            
-            # test values
-            z = 20
-            l = 8
             
             # ------------------------------------------------------------
             # 7.1.5.1. Peak picking
             f_pi, A_pi = _peak_picking(Phi_hat[z, l], fs_)
             
-            # 7.1.5.2. Weighting of high modulation rates
-            A_pi_tilde = _weight_high_mod_rates(f_pi, A_pi, F[z])
+            # if one or more peaks were found...
+            if f_pi.size > 0:
+                
+                # 7.1.5.2. Weighting of high modulation rates
+                A_pi_tilde = _weight_high_mod_rates(f_pi, A_pi, F[z])
+                
+                # 7.1.5.3. Estimation of fundamental modulation rate
+                f_p_imax, f_pi_hat, A_hat = _est_fund_mod_rate(f_pi, A_pi_tilde)
+                
+                # 7.1.5.4. Weighting of low modulation rates
+                A[z, l] = _weight_low_mod_rates(f_p_imax, f_pi_hat, A_hat, F[z])
             
-            # ------------------------------------------------------------
-            # 7.1.5.3. Estimation of fundamental modulation rate
-            f_p_imax, f_pi_hat, A_hat = _est_fund_mod_rate(f_pi, A_pi_tilde)
+                # 7.1.6. Optional entropy weighting based on randomness of the
+                # modulation rate  *** NOT IMPLEMENTED! ***
+                #   Requires a RPM signal with the same sampling rate as the sound
+                #   pressure signal!
             
-            # ------------------------------------------------------------
-            # 7.1.5.4. Weighting of low modulation rates
-            A = _weight_low_mod_rates(f_pi_hat, f_p_imax, A_hat, F[z])
-    
-    # ************************************************************************
-    # Section 7.1.6 of ECMA-418-2, 2nd Ed. (2022)
-    
-    # Optional entropy weighting based on randomness of the modulation rate
-    
-    # NOT IMPLEMENTED!
+            # if no peaks were found...
+            else:
+                A[z, l] = 0.
+            
     
     # ************************************************************************
     # Section 7.1.7 of ECMA-418-2, 2nd Ed. (2022)
