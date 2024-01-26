@@ -11,6 +11,7 @@ Author:
 import numpy as np
 
 from mosqito.sq_metrics.roughness.roughness_ecma._f_max import _f_max
+from mosqito.sq_metrics.roughness.roughness_ecma._weight_factor_G import _weight_factor_G
 
 
 def _weight_high_mod_rates(f_pi, A_pi, F_z):
@@ -62,11 +63,7 @@ def _weight_high_mod_rates(f_pi, A_pi, F_z):
     r_max = 1. / (1. + r1 * np.abs( np.log2(F_z/1000.) )**r2 )
     
     # weighting factor G (Eq. 85)
-    f1 = f_pi/f_max
-    f2 = f_max/f_pi
-    arg1 = ((f1 - f2) * q1)**2
-    
-    G = 1. / ((1. + arg1)**q2 )
+    G = _weight_factor_G(f_pi, f_max, q1, q2)
     
     # Weighted peaks' amplitudes (Eq. 83)
     A_pi_tilde = A_pi * r_max

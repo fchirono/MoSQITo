@@ -23,7 +23,8 @@ def _f_max(F_z):
     Returns
     -------
     f_max : float
-        Modulation rate at which the weighting factor G (Eq. 85) reaches a maximum of 1 
+        Modulation rate at which the weighting factor G (Eq. 85) reaches a
+        maximum of 1.
     """
     # Eq. 86
     f_max = 72.6937 * (1. - 1.1739*np.exp( -5.4583 * F_z / 1000. ))
