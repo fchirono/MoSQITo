@@ -43,7 +43,7 @@ def _peak_picking(Phi_hat_z_l, fs_):
     """
     
     # get number of points in power spectrum
-    sb_ = Phi_hat_z_l.shape
+    sb_ = Phi_hat_z_l.shape[0]
     
     # get range of indices to search over (k=2...255)
     k_range = np.arange(2, sb_//2)
