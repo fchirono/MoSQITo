@@ -224,7 +224,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
             f_pi, A_pi = _peak_picking(Phi_hat[z, l], fs_)
             
             # 7.1.5.2. Weighting of high modulation rates
-            A_pi_tilde = _weight_high_mod_rates(A_pi, F[z])
+            A_pi_tilde = _weight_high_mod_rates(f_pi, A_pi, F[z])
             
             # ------------------------------------------------------------
             # 7.1.5.3. Estimation of fundamental modulation rate
