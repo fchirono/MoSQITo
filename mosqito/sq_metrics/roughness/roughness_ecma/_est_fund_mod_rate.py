@@ -78,6 +78,9 @@ def _est_fund_mod_rate(f_pi, A_pi_tilde):
     i_max = np.argmax(E_i0)
     I_max = I_all[i_max]
     
+    # Fundamental modulation rate of the envelope
+    f_p_imax = f_pi[i_max]
+    
     # -------------------------------------------------------------------------
     # WARNING: list of indices 'I_max' is not sorted (i.e. from low to high)!
     # All variables 'X' are referred to as 'X[I_max]' from here onwards to 
@@ -101,4 +104,4 @@ def _est_fund_mod_rate(f_pi, A_pi_tilde):
     
     f_pi_hat = f_pi[I_max]
     
-    return f_pi_hat, A_hat
+    return f_p_imax, f_pi_hat, A_hat

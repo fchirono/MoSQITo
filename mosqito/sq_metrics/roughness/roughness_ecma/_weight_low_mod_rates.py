@@ -13,7 +13,8 @@ import numpy as np
 from mosqito.sq_metrics.roughness.roughness_ecma._f_max import _f_max
 from mosqito.sq_metrics.roughness.roughness_ecma._weight_factor_G import _weight_factor_G
 
-def _weight_low_mod_rates(f_pi_hat, A_hat, F_z):
+
+def _weight_low_mod_rates(f_pi_hat, f_p_imax, A_hat, F_z):
     """
     Implements the weighting of low modulation rates in Eqs. 95 to 96 of 
     Section 7.1.5.2 of ECMA-418-2 (2nd Ed, 2022) standard for calculating
@@ -24,6 +25,9 @@ def _weight_low_mod_rates(f_pi_hat, A_hat, F_z):
     f_pi_hat : (N_peaks,)-shaped numpy.array
         Estimated fundamental modulation rates
     
+    f_p_imax : float
+        Estimated fundamental modulation rate
+        
     A_hat : (N_peaks)-shaped numpy.array
         Estimated amplitudes of maxima in 'Phi_hat_z_l'
     
@@ -36,7 +40,6 @@ def _weight_low_mod_rates(f_pi_hat, A_hat, F_z):
         Weighted amplitudes of 'N_peaks' maxima in 'Phi_hat_z_l'
     """
 
-    
     q1_low = 0.7066
     
     # Eq. 96
@@ -49,7 +52,7 @@ def _weight_low_mod_rates(f_pi_hat, A_hat, F_z):
     # weighting factor G (Eq. 85)
     G = _weight_factor_G(f_pi_hat, f_max, q1_low, q2_low)
     
-    # Weighted peaks' amplitudes (Eq. 83)
+    # TODO: Summation and weighting
     A = A_pi * r_max
     A[ f_pi >= f_max ] *= G[f_pi >= f_max]
             

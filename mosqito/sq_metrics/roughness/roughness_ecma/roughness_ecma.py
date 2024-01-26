@@ -26,6 +26,7 @@ from mosqito.sq_metrics.roughness.roughness_ecma._env_noise_reduction import _en
 from mosqito.sq_metrics.roughness.roughness_ecma._peak_picking import _peak_picking
 from mosqito.sq_metrics.roughness.roughness_ecma._weight_high_mod_rates import _weight_high_mod_rates
 from mosqito.sq_metrics.roughness.roughness_ecma._est_fund_mod_rate import _est_fund_mod_rate
+from mosqito.sq_metrics.roughness.roughness_ecma._weight_low_mod_rates import _weight_low_mod_rates
 
 from mosqito.utils.conversion import bark2freq
 
@@ -230,11 +231,11 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
             
             # ------------------------------------------------------------
             # 7.1.5.3. Estimation of fundamental modulation rate
-            f_pi_hat, A_hat = _est_fund_mod_rate(f_pi, A_pi_tilde)
+            f_p_imax, f_pi_hat, A_hat = _est_fund_mod_rate(f_pi, A_pi_tilde)
             
             # ------------------------------------------------------------
             # 7.1.5.4. Weighting of low modulation rates
-            A = _weight_low_mod_rates(f_pi_hat, A_hat, F[z])
+            A = _weight_low_mod_rates(f_pi_hat, f_p_imax, A_hat, F[z])
     
     # ************************************************************************
     # Section 7.1.6 of ECMA-418-2, 2nd Ed. (2022)
