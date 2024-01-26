@@ -208,9 +208,6 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # Spectral weighting
     
-    
-    # search for local maxima in Phi_hat for k=2, ..., 255
-    
     # for each critical freq...
     for z in range(53):
         
@@ -218,6 +215,10 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
         for l in range(L):
             
             # TODO: code might not find any peaks!
+            
+            # # dummy values
+            # z = 20
+            # l = 8
             
             # 7.1.5.1. Peak picking
             f_pi, A_pi = _peak_picking(Phi_hat[z, l], fs_)
