@@ -47,7 +47,7 @@ def _env_noise_reduction(Phi_env):
                            mode='constant',
                            cval=0.)
     
-    # ------------------------------------------------------------------------
+    # .........................................................................
     # plot averaged power spectrum for one time segment
     
     # df_ = fs_/sb_
@@ -60,7 +60,7 @@ def _env_noise_reduction(Phi_env):
     # plt.xlabel('Freq [Hz]')
     # plt.ylabel('Critical band [Bark]')
     # plt.colorbar()
-    # ------------------------------------------------------------------------
+    # .........................................................................
     
     # Sum the averaged Power spectra to get an overview of all the modulation
     # patterns over time (Eq. 68)
@@ -96,7 +96,7 @@ def _env_noise_reduction(Phi_env):
     # --> For white gaussian noise of 80 dB, all weights 'w' become 0 and
     #   result in a roughness of 0 Asper
     
-    # ------------------------------------------------------------------------
+    # .........................................................................
     # plot weighting value 'w' for one time segment
     
     # df_ = fs_/sb_
@@ -108,7 +108,7 @@ def _env_noise_reduction(Phi_env):
     # plt.xlabel('Freq [Hz]')
     # plt.ylabel('Time step [s]')
     # plt.colorbar()
-    # ------------------------------------------------------------------------
+    # .........................................................................
     
     # weighted, averaged Power Spectra (Eq. 69)
     Phi_hat = Phi_avg*w

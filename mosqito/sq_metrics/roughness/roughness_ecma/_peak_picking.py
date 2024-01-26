@@ -62,14 +62,14 @@ def _peak_picking(Phi_hat_z_l, fs_):
         return np.array([]), np.array([])
     
     else:
-        # ---------------------------------------------------------------
+        # .........................................................................
         # Plot Phi_hat
         
         # plt.figure()
         # plt.plot(Phi_hat_z_l[:sb_//2+1], label='Phi hat')
         # plt.plot(phi_peaks, Phi_hat_z_l[phi_peaks], 'r*', label='Peaks')
         # plt.legend()
-        # ---------------------------------------------------------------
+        # .........................................................................
         
         # sort peak indices based on their prominences, from smallest to
         # largest prominence, and pick up to 10 highest
@@ -124,7 +124,10 @@ def _peak_picking(Phi_hat_z_l, fs_):
             cond2 = (beta[theta_min_i] * beta[theta_min_i-1] < 0)                
             
             if (cond1 and cond2):
-                tci = theta_min_i       # tci: theta_corr_index
+                
+                # tci: theta_corr_index
+                tci = theta_min_i
+                
             else:
                 tci = theta_min_i + 1
             
@@ -141,7 +144,7 @@ def _peak_picking(Phi_hat_z_l, fs_):
                       beta[tci] / (beta[tci] - beta[tci-1])))
             
             
-            # ------------------------------------------------------------
+            # .........................................................................
             # # plot figure comparing the different values for rho
             
             # # This entire approach (Eqs. 78 to 81) is identical to
@@ -157,8 +160,7 @@ def _peak_picking(Phi_hat_z_l, fs_):
             # plt.xlabel('beta(theta)')
             # plt.ylabel('E(theta)')
             # plt.legend()
-            
-            # ------------------------------------------------------------
+            # .........................................................................
             
             # Corrected modulation rate (Eq. 77)
             f_pi[i] = f_tilde + rho

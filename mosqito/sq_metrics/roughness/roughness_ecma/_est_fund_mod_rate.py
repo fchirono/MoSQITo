@@ -95,7 +95,7 @@ def _est_fund_mod_rate(f_pi, A_pi_tilde):
     f_p_imax = f_pi[i_max]
     
     # -------------------------------------------------------------------------
-    # WARNING: list of indices 'I_max' is not sorted (i.e. from low to high)!
+    # WARNING: list of indices 'I_max' is *NOT* sorted (i.e. from low to high)!
     # All variables 'X' are referred to as 'X[I_max]' from here onwards to 
     # account for 'I_max' ordering!
     # -------------------------------------------------------------------------
