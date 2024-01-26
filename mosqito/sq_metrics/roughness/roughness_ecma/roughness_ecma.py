@@ -24,6 +24,7 @@ from mosqito.sq_metrics.loudness.loudness_ecma._auditory_filters_centre_freq imp
 from mosqito.sq_metrics.roughness.roughness_ecma._von_hann import _von_hann
 from mosqito.sq_metrics.roughness.roughness_ecma._env_noise_reduction import _env_noise_reduction
 from mosqito.sq_metrics.roughness.roughness_ecma._peak_picking import _peak_picking
+from mosqito.sq_metrics.roughness.roughness_ecma._weight_high_mod_rates import _weight_high_mod_rates
 
 from mosqito.utils.conversion import bark2freq
 
@@ -221,42 +222,8 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
             # 7.1.5.1. Peak picking
             f_pi, A_pi = _peak_picking(Phi_hat[z, l], fs_)
             
-            # ------------------------------------------------------------
             # 7.1.5.2. Weighting of high modulation rates
-            
-            q1 = 1.2822
-            
-            # Eq. 87
-            if F[z]/1000. < 2**(-3.4253):
-                q2 = 0.2471
-            else:
-                q2 = 0.2471 + 0.0129 * (np.log2(F[z]/1000.) + 3.4253)**2
-                
-            # 'f_max' is the modulation rate at which the weighting factor G
-            # reaches a maximum of 1 (Eq. 86)
-            f_max = 72.6937 * (1. - 1.1739*np.exp( -5.4583 * F[z] / 1000. ))
-                             
-            # Parameters for r_max (Table 11)
-            if F[z] < 1000.:
-                r1 = 0.3560
-                r2 = 0.8049
-            else:
-                r1 = 0.8024
-                r2 = 0.9333
-            
-            # scaling factor r_max (Eq. 84)
-            r_max = 1. / (1. + r1 * np.abs( np.log2(F[z]/1000.) )**r2 )
-            
-            # weighting factor G (Eq. 85)
-            f1 = f_pi/f_max
-            f2 = f_max/f_pi
-            arg1 = ((f1 - f2) * q1)**2
-            
-            G = 1. / ((1. + arg1)**q2 )
-            
-            # Weighted peaks' amplitudes (Eq. 83)
-            A_pi_tilde = A_pi * r_max
-            A_pi_tilde[ f_pi >= f_max ] *= G[f_pi >= f_max]
+            A_pi_tilde = _weight_high_mod_rates(A_pi, F[z])
             
             # ------------------------------------------------------------
             # 7.1.5.3. Estimation of fundamental modulation rate
@@ -295,6 +262,8 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # Section 7.1.6 of ECMA-418-2, 2nd Ed. (2022)
     
     # Optional entropy weighting based on randomness of the modulation rate
+    
+    # NOT IMPLEMENTED!
     
     # ************************************************************************
     # Section 7.1.7 of ECMA-418-2, 2nd Ed. (2022)
