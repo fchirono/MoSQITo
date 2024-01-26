@@ -66,7 +66,7 @@ def _env_noise_reduction(Phi_env):
     s_ = np.sum(Phi_avg, axis=0)
     
     # median of 's_(L, k)' between k=2 and k=255
-    k_range = np.arange(2, 256)
+    k_range = np.arange(2, sb_//2)
     s_tilde = np.median(s_[:, k_range], axis=-1)
 
     # 's_tilde' becomes small compared to the peaks for modulated signals,
