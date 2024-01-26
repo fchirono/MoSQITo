@@ -13,7 +13,14 @@ import numpy as np
 def _est_fund_mod_rate(f_pi, A_pi_tilde):
     """
     Estimates the fundamental modulation rate from an array of power spectrum 
-    peaks at the current critical band and time step.
+    peaks at the current critical band and time step. Takes one array of peaks' 
+    frequencies and one array of peaks' weighted amplitudes, and returns the
+    estimated fundamental modulation rate, and one array of estimated peak
+    frequencies, and one array of (re-)weighted peak amplitudes.
+    
+    It assumes that there is one dominant harmonic complex - i.e. a fundamental
+    modulation rate with harmonics at integer multiples of this fundamental
+    rate.
     
     Parameters
     ----------
@@ -21,22 +28,28 @@ def _est_fund_mod_rate(f_pi, A_pi_tilde):
         Estimated modulation frequencies of maxima in 'Phi_hat_z_l'
     
     A_pi_tilde : (N_peaks,)-shaped numpy.array
-        Weighted amplitudes of 'N_peaks' maxima in 'Phi_hat_z_l'
+        Weighted amplitudes of maxima in 'Phi_hat_z_l'
     
     Returns
     -------
-
-    """
+    f_p_imax : float
+        Estimated fundamental modulation rate of the envelope
     
-    # # dummy data
-    # f_pi = np.arange(3, 9)
-    # A_pi_tilde = np.random.random(6)
+    f_pi_hat : (N_peaks2,)-shaped numpy.array
+        Estimated frequencies of the power spectrum peaks that are considered
+        part of the envelope.
+    
+    A_hat : (N_peaks2,)-shaped numpy.array
+        Weighted peaks' amplitudes.
+    """
     
     E_i0 = np.zeros(f_pi.shape[0])
     
     I_all = []
     
-    # for each candidate peak 'i0'...
+    # For each peak, test if peak frequency 'f_pi[i0]' is the best estimate for
+    # the fundamental modulation rate of the envelope - assumes the sum over
+    # the harmonic complex will result in the highest value for the best estimate.
     for i0 in range(f_pi.shape[0]):
         
         I_i0_candidate = []
@@ -54,7 +67,7 @@ def _est_fund_mod_rate(f_pi, A_pi_tilde):
             I_i0_candidate.append( ic[0] )
         
         # iterate over repeated values and pick the one that minimizes 'crit'
-        # (Eq. 89)
+        # (Eq. 89) and add to list of candidates
         for c in values[counts>1]:
             ic = np.nonzero(R_i0 == c)[0]
             
@@ -73,7 +86,7 @@ def _est_fund_mod_rate(f_pi, A_pi_tilde):
         # Energy of the harmonic complex (Eq. 91)
         E_i0[i0] = np.sum(A_pi_tilde[I_i0])
         
-    # find index 'i' that maximizes energy, and get the set 'I_i0'
+    # find index 'i_max' that maximizes energy, and get the set 'I_i0'
     # corresponding to that index
     i_max = np.argmax(E_i0)
     I_max = I_all[i_max]

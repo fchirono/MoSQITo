@@ -14,7 +14,7 @@ from mosqito.sq_metrics.roughness.roughness_ecma._f_max import _f_max
 from mosqito.sq_metrics.roughness.roughness_ecma._weight_factor_G import _weight_factor_G
 
 
-def _weight_low_mod_rates(f_pi_hat, f_p_imax, A_hat, F_z):
+def _weight_low_mod_rates(f_p_imax, f_pi_hat, A_hat, F_z):
     """
     Implements the weighting of low modulation rates in Eqs. 95 to 96 of 
     Section 7.1.5.2 of ECMA-418-2 (2nd Ed, 2022) standard for calculating
@@ -22,14 +22,15 @@ def _weight_low_mod_rates(f_pi_hat, f_p_imax, A_hat, F_z):
     
     Parameters
     ----------
-    f_pi_hat : (N_peaks,)-shaped numpy.array
-        Estimated fundamental modulation rates
-    
     f_p_imax : float
-        Estimated fundamental modulation rate
+        Estimated fundamental modulation rate of the envelope.
         
-    A_hat : (N_peaks)-shaped numpy.array
-        Estimated amplitudes of maxima in 'Phi_hat_z_l'
+    f_pi_hat : (N_peaks,)-shaped numpy.array
+        Estimated frequencies of the power spectrum peaks that are considered
+        part of the envelope.
+    
+    A_hat : (N_peaks,)-shaped numpy.array
+        Weighted peaks' amplitudes.
     
     F_z : int
         Centre frequency of the current critical frequency band.
