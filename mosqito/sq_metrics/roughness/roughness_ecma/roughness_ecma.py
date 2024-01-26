@@ -25,6 +25,7 @@ from mosqito.sq_metrics.roughness.roughness_ecma._von_hann import _von_hann
 from mosqito.sq_metrics.roughness.roughness_ecma._env_noise_reduction import _env_noise_reduction
 from mosqito.sq_metrics.roughness.roughness_ecma._peak_picking import _peak_picking
 from mosqito.sq_metrics.roughness.roughness_ecma._weight_high_mod_rates import _weight_high_mod_rates
+from mosqito.sq_metrics.roughness.roughness_ecma._est_fund_mod_rate import _est_fund_mod_rate
 
 from mosqito.utils.conversion import bark2freq
 
@@ -216,10 +217,11 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
             
             # TODO: code might not find any peaks!
             
-            # # dummy values
-            # z = 20
-            # l = 8
+            # test values
+            z = 20
+            l = 8
             
+            # ------------------------------------------------------------
             # 7.1.5.1. Peak picking
             f_pi, A_pi = _peak_picking(Phi_hat[z, l], fs_)
             
@@ -228,36 +230,11 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
             
             # ------------------------------------------------------------
             # 7.1.5.3. Estimation of fundamental modulation rate
+            f_pi_hat, A_hat = _est_fund_mod_rate(f_pi, A_pi_tilde)
             
-            # list of all maxima meeting the criteria
-            I_i0 = []
+            # ------------------------------------------------------------
+            # 7.1.5.4. Weighting of low modulation rates
             
-            # for each peak 'i0'...
-            for i0 in range(f_pi.shape[0]):
-                
-                i0=2
-                
-                # integer ratios of all peaks' modulation rates to the current
-                # peak modulation rate - Eq. 88
-                R_i0 = np.round(f_pi / f_pi[i0])
-                
-                # check ratios for repeated values - Eq. 89
-                R_unique, counts = np.unique(R_i0, return_counts=True)
-                
-                # iterate over the repeated values, pick values that minimize criteria
-                for c in R_unique[counts>1]:
-                    ic = np.nonzero(R_i0 == c)[0]
-                    
-                    i = ic[np.argmin( np.abs( (f_pi[ic] / (R_i0[ic]*f_pi[i0])) - 1 ))]
-                
-                    I_i0.append(i)
-                
-                
-            # Energy of the harmonic complex
-            E_i0 = np.sum(A_pi_tilde[I_i0])
-                    
-    
-    # 7.1.5.4. Weighting of low modulation rates
     
     # ************************************************************************
     # Section 7.1.6 of ECMA-418-2, 2nd Ed. (2022)
