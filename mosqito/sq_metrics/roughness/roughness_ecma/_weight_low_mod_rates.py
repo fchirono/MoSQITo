@@ -40,6 +40,7 @@ def _weight_low_mod_rates(f_pi_hat, f_p_imax, A_hat, F_z):
         Weighted amplitudes of 'N_peaks' maxima in 'Phi_hat_z_l'
     """
 
+    # Coefficients 'q1' and 'q2' for weighting factor 'G'
     q1_low = 0.7066
     
     # Eq. 96
@@ -52,9 +53,14 @@ def _weight_low_mod_rates(f_pi_hat, f_p_imax, A_hat, F_z):
     # weighting factor G (Eq. 85)
     G = _weight_factor_G(f_pi_hat, f_max, q1_low, q2_low)
     
-    # TODO: Summation and weighting
-    A = A_pi * r_max
-    A[ f_pi >= f_max ] *= G[f_pi >= f_max]
-            
+    # Summation and weighting (Eq. 95)
+    if f_p_imax < f_max:
+        A = np.sum(G * A_hat)
+    else:
+        A = np.sum(A_hat)
+
+    # Values of A below a threshold are set to zero
+    A = np.clip(A, 0.074376, None)    
+
     return A
             
