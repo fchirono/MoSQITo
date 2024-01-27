@@ -25,7 +25,6 @@ def _env_noise_reduction(Phi_env):
         Array containing the scaled, downsampled power spectrum for 53 critical
         bands, 'L' time steps, and 'sb_' frequency samples.
     
-    
     Returns
     -------
     Phi_hat : (53, L, sb_)-shaped numpy.array
@@ -39,23 +38,45 @@ def _env_noise_reduction(Phi_env):
     
     # Noise reduction of the envelopes
     
-    # averaging across neighboring critical bands
-    two_dim_filter = np.array([1/3, 1/3, 1/3])
+    # averaging across three neighboring critical bands
     
-    Phi_avg = sim.convolve(Phi_env,
-                           two_dim_filter[:, np.newaxis, np.newaxis],
-                           mode='constant',
-                           cval=0.)
+    Phi_avg = np.zeros(Phi_env.shape)
+    
+    # average bands {0, 1}
+    Phi_avg[0, :, :] = (Phi_env[0, :, :] + Phi_env[1, :, :])/3.
+    
+    # average bands {n-1, n, n+1}    
+    for z in range(1, 52):
+        Phi_avg[z, :, :] = (Phi_env[z-1, :, :] + Phi_env[z, :, :] + Phi_env[z+1, :, :])/3.
+    
+    # average bands {51, 52}
+    Phi_avg[52, :, :] = (Phi_env[51, :, :] + Phi_env[52, :, :])/3.
     
     # .........................................................................
     # plot averaged power spectrum for one time segment
     
+    # bark_axis = np.linspace(0.5, 26.5, num=53, endpoint=True)
+    
+    # fs_ = 1500
     # df_ = fs_/sb_
     # f = np.linspace(0, fs_ - df_, sb_)[:sb_//2+1]
     
+    # band_to_plot = 35
+    # timestep_to_plot = 8
+    
     # plt.figure()
     # plt.pcolormesh(f, bark_axis,
-    #                 10*np.log10(Phi_avg[:, timestep_to_plot, :sb_//2+1]))
+    #                10*np.log10(Phi_avg[:, timestep_to_plot, :sb_//2+1]),
+    #                vmin=0, vmax=1)
+    # plt.title(f'Original power spectrum of envelopes')
+    # plt.xlabel('Freq [Hz]')
+    # plt.ylabel('Critical band [Bark]')
+    # plt.colorbar()
+    
+    # plt.figure()
+    # plt.pcolormesh(f, bark_axis,
+    #                10*np.log10(Phi_env[:, timestep_to_plot, :sb_//2+1]),
+    #                vmin=0, vmax=1)
     # plt.title(f'Averaged power spectrum of envelopes')
     # plt.xlabel('Freq [Hz]')
     # plt.ylabel('Critical band [Bark]')
@@ -86,8 +107,8 @@ def _env_noise_reduction(Phi_env):
                * np.clip(0.1891 * np.exp(0.0120 * k), 0., 1.) )
     
     # Eq. 70
-    w_tilde_max = np.max(w_tilde[:, k_range], axis=-1)
-    w_mask = (w_tilde >= 0.05 * w_tilde_max[:, np.newaxis])
+    w_tilde_max = np.max( w_tilde[:, k_range], axis=-1)
+    w_mask = ( w_tilde >= 0.05 * w_tilde_max[:, np.newaxis] )
     
     w = np.zeros(s_.shape)
     w[w_mask] = np.clip( w_tilde[w_mask] - 0.1407, 0., 1.)
@@ -103,10 +124,10 @@ def _env_noise_reduction(Phi_env):
     # f = np.linspace(0, fs_ - df_, sb_)[:sb_//2+1]
     
     # plt.figure()
-    # plt.pcolormesh(f, time_array[0, :], w[:, :sb_//2+1])
+    # plt.pcolormesh(f, np.arange(w.shape[0]), w[:, :sb_//2+1])
     # plt.title(f"Weighting coefficient 'w' (Eq. 70)")
     # plt.xlabel('Freq [Hz]')
-    # plt.ylabel('Time step [s]')
+    # plt.ylabel('Time step')
     # plt.colorbar()
     # .........................................................................
     
