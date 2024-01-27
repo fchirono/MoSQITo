@@ -18,12 +18,12 @@ def _nonlinear_transform(R_est):
     Parameters
     ----------
     R_est : (53, Nt)-shaped numpy.array
-        Array of interpolated, clipped values.
+        Array of interpolated, clipped, uncalibrated Roughness values.
     
     Returns
     -------
     R_hat : (53, Nt)-shaped numpy.array
-        Array of transformed, calibrated values.
+        Array of transformed, calibrated Roughness values.
     """
 
     # squared mean (Eq. 107)

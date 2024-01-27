@@ -230,10 +230,8 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # interpolate to new sampling frequency fs_50 = 50 Hz
     R_est, t_50, fs_50 = _interpolate_to_50Hz(A, time_array, n_samples, fs)
     
-
     # Perform nonlinear transform and calibration (Eqs. 104 to 108)
     R_hat = _nonlinear_transform(R_est)
-    
     R_spec = _lowpass_filtering(R_hat, fs_50)
     
     # calculate time-dependent Roughness by integrating over all critical bands

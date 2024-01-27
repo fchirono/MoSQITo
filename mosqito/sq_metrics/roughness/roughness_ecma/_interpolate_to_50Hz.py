@@ -36,7 +36,7 @@ def _interpolate_to_50Hz(A, time_array, n_samples, fs):
     Returns
     -------
     R_est : (53, Nt)-shaped numpy.array
-        Array of interpolated, clipped values.
+        Array of interpolated, clipped, uncalibrated Roughness values.
         
     t_50 : (Nt,)-shaped numpy.array
         New time array for interpolated time steps
@@ -45,7 +45,7 @@ def _interpolate_to_50Hz(A, time_array, n_samples, fs):
         New sampling frequency of 50 Hz
     """
 
-    # interpolate A[z, l] to new sampling rate of 50 Hz
+    # New sampling rate of 50 Hz
     fs_50 = 50.
     
     # Last sample to be evaluated (Eq. 103) - removes the results belonging to
@@ -54,7 +54,7 @@ def _interpolate_to_50Hz(A, time_array, n_samples, fs):
     
     t_50 = np.arange(l50_end) * (1./fs_50)
     
-    # create Piecewise cubic Hermitian Interpolating Polynomial (PCHIP)
+    # interpolate using Piecewise cubic Hermitian Interpolating Polynomial (PCHIP)
     R_est = si.pchip_interpolate(time_array[0, :], A, t_50, axis=-1)
     
     # set negative values to zero
