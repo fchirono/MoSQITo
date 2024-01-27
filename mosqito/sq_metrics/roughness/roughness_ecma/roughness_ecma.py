@@ -57,16 +57,22 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
         Time-dependent Roughness
         
     R_spec: (53, Nt)-shaped numpy.array
-        Time-dependent Specific Rughness [asper per Bark]. Each of the 53 element
-        of the list corresponds to the time-dependent specific roughness for a
-        given bark band. Can be a ragged array if a different sb/sh are used
-        for each band.
+        Time-dependent Specific Rughness [asper per Bark].
 
     bark_axis : (53,)-shaped numpy.array
         Critical frequency scale, in Bark.
     
     time : (Nt,)-shaped numpy.array
         Time axis at 50 Hz sampling frequency.
+    
+    Examples
+    --------
+    To obtain the single-value Roughness of a signal, take the 90th percentile
+    of the time-dependent Roughness 'R', discarding the first 16 samples (approx.
+    300 ms):
+        
+    >>> R, _, _, _ = roughness_ecma(signal, fs)
+    >>> R_singlevalue = np.percentile(R[16:], 90)
     """
     
     assert fs == 48000, "Sampling frequency 'fs' must be 48 kHz!"
