@@ -114,7 +114,7 @@ def _peak_picking(Phi_hat_z_l, fs_):
             theta, E = _error_correction()
             
             # Eq. 79
-            beta = ( ( np.floor( f_tilde / delta_f ) + theta/32) * delta_f
+            beta = ( ( np.floor( f_tilde / delta_f_ ) + theta/32) * delta_f_
                     - (f_tilde + E))
             
             # ------------------------------------------------------------            
