@@ -26,6 +26,6 @@ def _von_hann():
     
     N = 512
     
-    arg1 = 2*np.pi*np.arange(N)/512
+    arg1 = 2 * np.pi * np.arange(N) / N
     
     return (0.5 - 0.5*np.cos(arg1)) / np.sqrt(0.375)
