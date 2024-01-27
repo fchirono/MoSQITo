@@ -34,8 +34,12 @@ from mosqito.sq_metrics.roughness.roughness_ecma._lowpass_filtering import _lowp
 
 
 def roughness_ecma(signal, fs, sb=16384, sh=4096):
-    """Roughness calculation of a signal sampled at 48 kHz, according to 
-    ECMA-418-2, 2nd Ed (2022).
+    """Calculation of the psychoacoustic roughness a signal, based on the
+    scaled envelope power spectra, as described in ECMA-418-2, 2nd Ed (2022).
+    
+    The calculation is based on the signal Specific Loudness " N'(z, l)", 
+    and the envelope of the 53 segmented, band-passed signals in each critical
+    band. The signal must be sampled at 'fs'=48 kHz
 
     Parameters
     ----------
@@ -79,32 +83,31 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     n_samples = signal.shape[0]
     
-    # ************************************************************************
-    # Preliminary: calculate time-dependent specific loudness N'(l, z)
+    # -------------------------------------------------------------------------
+    # Preliminaries
     
-    # N_basis is (53, L)-shaped,, where L is the number of time segments
+    # Calculate time-dependent specific loudness N'(l, z)
+    # --> N_basis is (53, L)-shaped, where L is the number of time segments
     N_basis, bark_axis = loudness_ecma(signal, sb, sh)
     N_basis = np.array(N_basis)
     
+    # Number of time segments
     L = N_basis.shape[1]
     
     # get centre frequencies of auditory filters
     F = _auditory_filters_centre_freq()
     
-
     # 5.1.2 Windowing and zero-padding
     signal, n_new = _windowing_zeropadding(signal, sb, sh)
 
-    
-    # 5.1.3, 5.1.4 Computaton of band-pass signals
+    # 5.1.3, 5.1.4 - Computaton of band-pass signals
     bandpass_signals = _band_pass_signals(signal)
 
-
     # 5.1.5 Segmentation into blocks    
-    block_array, time_array = _ecma_time_segmentation(bandpass_signals, sb, sh,
-                                                      n_new)
+    block_array, time_array = _ecma_time_segmentation(bandpass_signals,
+                                                      sb, sh, n_new)
     
-    # block_array is (53, L, sb)-shaped, where L is number of time segments
+    # block_array is (53, L, sb)-shaped
     block_array = np.array(block_array)
     
     # time_array is (53, L)-shaped
@@ -134,7 +137,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # plt.title(f'{band_to_plot} Bark ({bark2freq(band_to_plot)} Hz)')
     # .........................................................................
     
-    # Downsampling by a factor of 32
+    # Downsampling by a total factor of 32, in two separate steps of 8 and 4
     downsampling_factor = 32
     p_env_downsampled_ = ssig.decimate(p_env, downsampling_factor//4)
     p_env_downsampled = ssig.decimate(p_env_downsampled_, 4)
