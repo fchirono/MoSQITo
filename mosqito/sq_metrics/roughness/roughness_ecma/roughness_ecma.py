@@ -20,6 +20,7 @@ from mosqito.sq_metrics.loudness.loudness_ecma.loudness_ecma import loudness_ecm
 from mosqito.sq_metrics.loudness.loudness_ecma._band_pass_signals import _band_pass_signals
 from mosqito.sq_metrics.loudness.loudness_ecma._ecma_time_segmentation import _ecma_time_segmentation
 from mosqito.sq_metrics.loudness.loudness_ecma._auditory_filters_centre_freq import _auditory_filters_centre_freq
+from mosqito.sq_metrics.loudness.loudness_ecma._windowing_zeropadding import _windowing_zeropadding
 
 from mosqito.sq_metrics.roughness.roughness_ecma._von_hann import _von_hann
 from mosqito.sq_metrics.roughness.roughness_ecma._env_noise_reduction import _env_noise_reduction
@@ -30,6 +31,7 @@ from mosqito.sq_metrics.roughness.roughness_ecma._weight_low_mod_rates import _w
 from mosqito.sq_metrics.roughness.roughness_ecma._interpolate_to_50Hz import _interpolate_to_50Hz
 from mosqito.sq_metrics.roughness.roughness_ecma._nonlinear_transform import _nonlinear_transform
 from mosqito.sq_metrics.roughness.roughness_ecma._lowpass_filtering import _lowpass_filtering
+
 
 def roughness_ecma(signal, fs, sb=16384, sh=4096):
     """Roughness calculation of a signal sampled at 48 kHz, according to 
@@ -83,42 +85,16 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # get centre frequencies of auditory filters
     F = _auditory_filters_centre_freq()
     
-    # ************************************************************************
-    # 5.1.2 Windowing function, zero-padding
+
+    # 5.1.2 Windowing and zero-padding
+    signal, n_new = _windowing_zeropadding(signal, sb, sh)
+
     
-    # -----------------------------------------------------------------------    
-    # Apply windowing function to first 5 ms (240 samples)
-    n_fadein = 240
-    
-    # Eq. (1)
-    w_fadein = 0.5 - 0.5*np.cos(np.pi*np.arange(n_fadein)/n_fadein)
-    
-    signal[:240] *= w_fadein
-    
-    # -----------------------------------------------------------------------    
-    # Calculate zero padding at start and end of signal
-    sb_max = np.max(sb)
-    sh_max = np.max(sh)
-    
-    n_zeros_start = sb_max
-    
-    # Eqs. (2), (3) 
-    n_new = sh_max * (np.ceil((n_samples + sh_max + sb_max)/(sh_max)) - 1)
-    
-    n_zeros_end = int(n_new) - n_samples
-    
-    signal = np.concatenate( (np.zeros(n_zeros_start),
-                              signal,
-                              np.zeros(n_zeros_end)))
-    
-    # ************************************************************************
     # 5.1.3, 5.1.4 Computaton of band-pass signals
-    
     bandpass_signals = _band_pass_signals(signal)
 
-    # ************************************************************************
-    # 5.1.5 Segmentation into blocks
-    
+
+    # 5.1.5 Segmentation into blocks    
     block_array, time_array = _ecma_time_segmentation(bandpass_signals, sb, sh,
                                                       n_new)
     
