@@ -10,7 +10,6 @@ Author:
 
 import numpy as np
 
-from mosqito.sq_metrics.roughness.roughness_ecma._f_max import _f_max
 from mosqito.sq_metrics.roughness.roughness_ecma._weight_factor_G import _weight_factor_G
 
 
