@@ -28,6 +28,8 @@ from mosqito.sq_metrics.roughness.roughness_ecma._weight_high_mod_rates import _
 from mosqito.sq_metrics.roughness.roughness_ecma._est_fund_mod_rate import _est_fund_mod_rate
 from mosqito.sq_metrics.roughness.roughness_ecma._weight_low_mod_rates import _weight_low_mod_rates
 from mosqito.sq_metrics.roughness.roughness_ecma._interpolate_to_50Hz import _interpolate_to_50Hz
+from mosqito.sq_metrics.roughness.roughness_ecma._nonlinear_transform import _nonlinear_transform
+
 
 def roughness_ecma(signal, fs, sb=16384, sh=4096):
     """[*WARNING*] Roughness calculation of a signal sampled at 48 kHz,
@@ -241,30 +243,13 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # ************************************************************************
     # 7.1.7 Calcuation of time-dependent specific roughness
     
-    R_est, t_50, fs_50 = _interpolate_to_50Hz()
+    # interpolate to new sampling frequency fs_50 = 50 Hz
+    R_est, t_50, fs_50 = _interpolate_to_50Hz(A, time_array, n_samples, fs)
     
-    # -----------------------------------------------------------------------
-    # Perform nonlinear transform and calibration
+
+    # Perform nonlinear transform and calibration (Eqs. 104 to 108)
+    R_hat = _nonlinear_transform(R_est)
     
-    # squared mean (Eq. 107)
-    R_tilde = np.sqrt( np.sum(R_est**2, axis=0) / bark_axis.size )
-    
-    # linear mean (Eq. 108)
-    R_lin = np.mean(R_est, axis=0)
-    
-    # calibration factor c_R [asper / Bark_HMS]
-    c_R = 0.0180909
-    
-    # Eq. 106
-    B_l = R_tilde / R_lin
-    B_l[R_lin == 0] = 0.
-    
-    # Eq. 105
-    arg_tanh = 1.6407 * (B_l - 2.5804)
-    E_l = 0.95555*( np.tanh(arg_tanh) + 1)*0.5 + 0.58449
-    
-    # time-dependent specific roughness estimate (Eq. 104)
-    R_hat = c_R * (R_est ** E_l)
     
     # -----------------------------------------------------------------------
     # Perform lowpass filtering (smoothing) using different time constants
