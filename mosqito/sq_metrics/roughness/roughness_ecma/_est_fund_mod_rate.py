@@ -33,14 +33,15 @@ def _est_fund_mod_rate(f_pi, A_pi_tilde):
     Returns
     -------
     f_p_imax : float
-        Estimated fundamental modulation rate of the envelope
+        Estimated fundamental modulation rate of the envelope.
     
     f_pi_hat : (N_peaks2,)-shaped numpy.array
         Estimated frequencies of the power spectrum peaks that are considered
         part of the envelope.
     
     A_hat : (N_peaks2,)-shaped numpy.array
-        Weighted peaks' amplitudes.
+        Weighted amplitudes of the power spectrum peaks that are considered
+        part of the envelope.
     """
     
     E_i0 = np.zeros(f_pi.shape[0])
@@ -66,8 +67,8 @@ def _est_fund_mod_rate(f_pi, A_pi_tilde):
             ic = np.nonzero(R_i0 == c)[0]
             I_i0_candidate.append( ic[0] )
         
-        # iterate over repeated values and pick the one that minimizes 'crit'
-        # (Eq. 89) and add to list of candidates
+        # iterate over repeated values, pick the one that minimizes 'crit'
+        # (Eq. 89), and add to list of candidates
         for c in values[counts>1]:
             ic = np.nonzero(R_i0 == c)[0]
             
@@ -97,7 +98,7 @@ def _est_fund_mod_rate(f_pi, A_pi_tilde):
     # -------------------------------------------------------------------------
     # WARNING: list of indices 'I_max' is *NOT* sorted (i.e. from low to high)!
     # All variables 'X' are referred to as 'X[I_max]' from here onwards to 
-    # account for 'I_max' ordering!
+    # use a consistent 'I_max'-based ordering!
     # -------------------------------------------------------------------------
     
     # Peak amplitudes' weighting 
