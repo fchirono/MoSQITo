@@ -38,18 +38,18 @@ def _weight_high_mod_rates(f_pi, A_pi, F_z):
         Weighted amplitudes of 'N_peaks' maxima in 'Phi_hat_z_l'
     """
 
+    
     q1 = 1.2822
     
     # Eq. 87
-    if ( F_z/1000. < 2**(-3.4253) ):
+    if F_z/1000. < 2**(-3.4253):
         q2 = 0.2471
     else:
         q2 = 0.2471 + 0.0129 * (np.log2(F_z/1000.) + 3.4253)**2
         
-    # 'f_max' is the modulation rate at which the weighting factor 'G'
+    # 'f_max' is the modulation rate at which the weighting factor G
     # reaches a maximum of 1 (Eq. 86)
-    f_max = 72.6937 * (1. - 1.1739*np.exp( -5.4583 * F_z / 1000. ))
-    
+    f_max = _f_max(F_z)
                      
     # Parameters for r_max (Table 11)
     if F_z < 1000.:
