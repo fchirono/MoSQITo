@@ -153,18 +153,21 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # get Von Hann window coefficients
     hann = _von_hann()
     
-    # max Loudness (Eq. 67)
+    # max Loudness per time step
     N_max = np.max(N_basis, axis=0)
+    
+    # Eq. 67
     Phi_env_zero = np.sum( (hann*p_env_downsampled)**2 , axis=-1)
     
     # Scaled power spectrum (Eq. 66)
-    scaling = np.zeros(N_basis.shape)
     non_zero = (N_max*Phi_env_zero != 0)
+    
+    scaling = np.zeros(N_basis.shape)
     scaling[non_zero] = (N_basis**2)[non_zero] / (N_max * Phi_env_zero)[non_zero]
     
     # 'Phi_env' is (53, L, sb_)-shaped
     Phi_env = (scaling[:, :, np.newaxis]
-               * np.abs(np.fft.fft(hann*p_env_downsampled))**2 )
+               * np.abs( np.fft.fft(hann*p_env_downsampled) )**2 )
     
     # .........................................................................
     # plot scaled power spectrum for one time segment
