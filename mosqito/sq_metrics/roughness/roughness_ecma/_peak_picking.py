@@ -12,18 +12,18 @@ import numpy as np
 import scipy.signal as ssig
 import matplotlib.pyplot as plt
 
-from mosqito.sq_metrics.roughness.roughness_ecma._beta import _beta
 from mosqito.sq_metrics.roughness.roughness_ecma._error_correction import _error_correction
 
 
 def _peak_picking(Phi_hat_z_l, fs_):
     """
-    Implements the peak picking functions in Section 7.1.5.1 of
-    ECMA-418-2 (2nd Ed, 2022) standard for calculating Roughness. It takes an
-    array of noise-reduced, downsampled power spectrum values for one critical
-    frequency 'z' and one time step 'l', finds 'N_peaks' maxima that fulfill
-    certain conditons, and estimates the frequencies and amplitudes of these
-    maxima.
+    Implements the peak picking functions in Section 7.1.5.1 of ECMA-418-2
+    (2nd Ed, 2022) standard for calculating Roughness.
+    
+    This function takes an array of noise-reduced, downsampled power spectrum
+    values for one critical frequency 'z' and one time step 'l', finds
+    'N_peaks' maxima that fulfill certain conditons, and estimates the
+    frequencies and amplitudes of these maxima.
     
     Parameters
     ----------
@@ -58,6 +58,7 @@ def _peak_picking(Phi_hat_z_l, fs_):
     phi_peaks += 2
     
     if phi_peaks.size == 0:
+        
         # if no peaks were found, return empty arrays
         return np.array([]), np.array([])
     
@@ -72,7 +73,7 @@ def _peak_picking(Phi_hat_z_l, fs_):
         # .........................................................................
         
         # sort peak indices based on their prominences, from smallest to
-        # largest prominence, and pick up to 10 highest
+        # largest prominence, and pick (up to) 10 peaks with highest prominence
         sort_indices = np.argsort(peaks_dict['prominences'])[-10:]
         
         # get peak indices sorted by increasing prominence
@@ -80,9 +81,9 @@ def _peak_picking(Phi_hat_z_l, fs_):
         
         # Check if Phi[peak] > 0.05 * max(Phi[all_peaks]) (Eq. 72)
         peak_is_tall = (Phi_hat_z_l[phi_peaks_sorted]
-                        > 0.05*np.max(Phi_hat_z_l[phi_peaks_sorted]))
+                        > 0.05 * np.max( Phi_hat_z_l[phi_peaks_sorted] ) )
         
-        # list of peaks in current critical freq, time step that match criteria
+        # list of peaks in current critical freq, time step, that match criteria
         tall_peaks = phi_peaks_sorted[peak_is_tall]
         
         # for each tall peak, implement a quadratic fit to estimate modulation
@@ -105,13 +106,16 @@ def _peak_picking(Phi_hat_z_l, fs_):
             # find vector of unknowns
             C = np.linalg.solve(K, phi_vec)
             
-            # first corrected modulation rate
-            delta_f_ = fs_/sb_
-            f_tilde = -C[1]/(2*C[0]) * delta_f_
+            # first corrected modulation rate (Eq. 76)
+            delta_f_ = fs_ / sb_
+            f_tilde = -C[1] / ( 2 * C[0] ) * delta_f_
             
             # get values of theta, E(theta), beta(theta)
             theta, E = _error_correction()
-            beta = _beta(theta, f_tilde, delta_f_, E)
+            
+            # Eq. 79
+            beta = ( ( np.floor( f_tilde / delta_f ) + theta/32) * delta_f
+                    - (f_tilde + E))
             
             # ------------------------------------------------------------            
             # calculate correction factor following Eq. 78 to 81
@@ -143,7 +147,6 @@ def _peak_picking(Phi_hat_z_l, fs_):
                     - ( (E[tci] - E[tci-1])*
                       beta[tci] / (beta[tci] - beta[tci-1])))
             
-            
             # .........................................................................
             # # plot figure comparing the different values for rho
             
@@ -154,7 +157,7 @@ def _peak_picking(Phi_hat_z_l, fs_):
             # plt.figure()
             # plt.plot(beta, E, '^:', markersize=10, label='Table 10, Eq. 79')
             # plt.plot(0, rho_np, 'r*', markersize=15, label='np.interp')
-            # plt.plot(0, rho_, 'bs', markersize=12, label='Eq. 78 (published)')
+            # plt.plot(0, rho_, 'bs', markersize=12, label='Eq. 78 (as published)')
             # plt.plot(0, rho, 'mo', markersize=8, label='Eq. 78 (corrected)')
             # plt.grid()
             # plt.xlabel('beta(theta)')
