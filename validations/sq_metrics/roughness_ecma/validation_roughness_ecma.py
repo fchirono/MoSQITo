@@ -17,27 +17,31 @@ from mosqito.sq_metrics.roughness.utils import _create_am_bbn, _create_am_sin
 from input.references import ref_zf
 
 
-# %% Define range of fc and fm
+# %% Define ranges of fc and fm
 
-fc_array = np.array([125, 250, 500, 1000, 2000, 4000, 8000])
+fc_all = np.array([125, 250, 500, 1000, 2000, 4000, 8000])
 
-
-# range from 10 to 400
-fm1 = 10
-fm2 = 400
-fm_array = np.logspace(np.log10(fm1), np.log10(fm2), 15, base=10)
+# lower, upper frequency in range for each fc
+fm_all = np.array([[10,  10,  10,  10,  15,  15,  20],
+                   [100, 150, 200, 400, 350, 300, 250]])
 
 
 # %% Recreate Figure 11.2 from Fastl & Zwicker
+
+N_interp_fm = 31
 
 linestyles = [':', ':', ':', '-', '--', '--', '--',]
 
 plt.figure()
 
-for i, fc in enumerate(fc_array):
+for i, fc in enumerate(fc_all):
     
-    R = ref_zf(fc, fm_array)
-    plt.loglog(fm_array, R, label=f'fc = {fc} Hz', linestyle=linestyles[i])
+    fm = np.logspace(np.log10(fm_all[0, i]),
+                     np.log10(fm_all[1, i]), N_interp_fm, base=10)
+
+    R = ref_zf(fc, fm)
+    
+    plt.loglog(fm, R, label=f'fc = {fc} Hz', linestyle=linestyles[i])
 
 plt.grid()
 plt.xlim([10, 400])
@@ -45,7 +49,7 @@ plt.ylim([0.07, 1])
 plt.legend()
 plt.xlabel(r'Modulation frequency $f_{m} [Hz]$')
 plt.ylabel('Roughness [asper]')
-plt.title('Fastl & Zwicker')
+plt.title('Fastl & Zwicker, Fig. 11.2')
 
 # %% create test signals
 
@@ -58,7 +62,10 @@ t = np.linspace(0, T-dt, int(T*fs))
 
 spl = 60
 
-for fc in fc_array:
+for c, fc in enumerate(fc_all):
+    
+    fm_array = np.logspace(np.log10(fm_all[0, c]),
+                           np.log10(fm_all[1, c]), N_interp_fm, base=10)
     
     # get values from Fastl & Zwicker
     R_fz = ref_zf(fc, fm_array)
@@ -74,18 +81,26 @@ for fc in fc_array:
         # test signal - amplitude-modulated sine wave
         x = _create_am_sin(spl, fc, xm, fs)
 
+        # plt.figure()
+        # plt.plot(t, x)
+        
         # calculate Roughness using DW model
-        R_dw_, _, _, _ = roughness_dw(x, fs=fs, overlap=0.5)
-        R_dw[i] = np.mean(R_dw)
+        R_dw_temp, _, _, _ = roughness_dw(x, fs=fs, overlap=0.5)
+        R_dw[i] = np.mean(R_dw_temp)
         
         # calculate Roughness using ECMA model
-        R_ecma_, _, _, _ = roughness_ecma(x, fs)
-        R_ecma[i] = np.percentile(R_ecma_, 90)
+        R_ecma_temp, _, _, _ = roughness_ecma(x, fs)
+        R_ecma[i] = np.percentile(R_ecma_temp, 90)
         
     plt.figure()
-    plt.loglog(fm_array, R_fz, 'Fastl & Zwicker [interp]', '-')
-    plt.loglog(fm_array, R_dw, 'Daniel & Weber', ':')
-    plt.loglog(fm_array, R_fz, 'ECMA 418-2', '-.')
+    plt.loglog(fm_array, R_fz, '-', linewidth=2, label='Fastl & Zwicker [interp]')
+    plt.loglog(fm_array, R_dw, ':', linewidth=1.5, label='Daniel & Weber')
+    plt.loglog(fm_array, R_ecma, '-.', label='ECMA 418-2')
+    plt.legend()
+    plt.grid()
+    plt.xlim([10, 400])
+    # plt.ylim([0.07, 1])
     plt.xlabel(r'Modulation Frequency $f_m$ [Hz]')
     plt.ylabel('Roughness [asper]')
-    plt.title(r'Carrier frequency $f_c$={fc} Hz')
+    plt.title(rf'Carrier frequency $f_c$={fc} Hz')
+    
