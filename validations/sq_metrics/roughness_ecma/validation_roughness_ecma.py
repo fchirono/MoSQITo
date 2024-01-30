@@ -62,10 +62,10 @@ t = np.linspace(0, T-dt, int(T*fs))
 
 spl = 60
 
-for c, fc in enumerate(fc_all):
+for i, fc in enumerate(fc_all):
     
-    fm_array = np.logspace(np.log10(fm_all[0, c]),
-                           np.log10(fm_all[1, c]), N_interp_fm, base=10)
+    fm_array = np.logspace(np.log10(fm_all[0, i]),
+                           np.log10(fm_all[1, i]), N_interp_fm, base=10)
     
     # get values from Fastl & Zwicker
     R_fz = ref_zf(fc, fm_array)
@@ -73,7 +73,7 @@ for c, fc in enumerate(fc_all):
     R_dw = np.zeros(fm_array.shape)
     R_ecma = np.zeros(fm_array.shape)
     
-    for i, fm in enumerate(fm_array):
+    for j, fm in enumerate(fm_array):
         
         # modulating frequency
         xm = 1.0*np.sin(2*np.pi*fm*t)
@@ -86,11 +86,11 @@ for c, fc in enumerate(fc_all):
         
         # calculate Roughness using DW model
         R_dw_temp, _, _, _ = roughness_dw(x, fs=fs, overlap=0.5)
-        R_dw[i] = np.mean(R_dw_temp)
+        R_dw[j] = np.mean(R_dw_temp)
         
         # calculate Roughness using ECMA model
         R_ecma_temp, _, _, _ = roughness_ecma(x, fs)
-        R_ecma[i] = np.percentile(R_ecma_temp, 90)
+        R_ecma[j] = np.percentile(R_ecma_temp, 90)
         
     plt.figure()
     plt.loglog(fm_array, R_fz, '-', linewidth=2, label='Fastl & Zwicker [interp]')
