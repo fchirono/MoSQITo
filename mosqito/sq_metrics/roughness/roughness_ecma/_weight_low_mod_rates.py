@@ -61,7 +61,8 @@ def _weight_low_mod_rates(f_p_imax, f_pi_hat, A_hat, F_z):
         A = np.sum(A_hat)
 
     # Values of A below a threshold are set to zero
-    A[ A < 0.074376] = 0.
+    if A < 0.074376:
+        A = 0.
 
     return A
             
