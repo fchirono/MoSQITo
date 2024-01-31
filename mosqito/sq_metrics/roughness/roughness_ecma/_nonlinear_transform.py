@@ -36,8 +36,9 @@ def _nonlinear_transform(R_est):
     c_R = 0.0180909
     
     # Eq. 106
-    B_l = R_tilde / R_lin
-    B_l[R_lin == 0] = 0.
+    Rlin_nonzero = (R_lin != 0)
+    B_l = np.zeros(R_tilde.shape)
+    B_l[Rlin_nonzero] = R_tilde[Rlin_nonzero] / R_lin[Rlin_nonzero]
     
     # Eq. 105
     arg_tanh = 1.6407 * (B_l - 2.5804)
