@@ -123,6 +123,8 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # .........................................................................
     # # plot envelope and bandpass signal for one segment
     
+    # from mosqito.utils.conversion import bark2freq
+    
     # band_to_plot = 35
     # timestep_to_plot = 8
     
@@ -134,7 +136,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # plt.plot(t, block_array[band_to_plot, timestep_to_plot, :], ':',
     #           label='Bandpass Signal')
     # plt.legend()
-    # plt.title(f'{band_to_plot} Bark ({bark2freq(band_to_plot)} Hz)')
+    # plt.title(f'{band_to_plot} Bark ({bark2freq(bark_axis[band_to_plot])} Hz)')
     # .........................................................................
     
     # Downsampling by a total factor of 32, in two separate steps of 8 and 4
