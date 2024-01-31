@@ -29,7 +29,7 @@ plt.close('all')
 
 # Local application imports
 from mosqito.sq_metrics import roughness_dw, roughness_ecma
-from mosqito.sq_metrics.roughness.utils import _create_am_bbn, _create_am_sin
+from mosqito.sq_metrics.roughness.utils import _create_am_sin
 
 # must be run from 'MoSQITo/validations/sq_metrics/roughness_ecma' folder!
 from input.references import ref_zf
