@@ -4,7 +4,8 @@ Validation script of Roughness ECMA 418-2, 2nd Ed (2022) standard [1].
 
 Creates a series of amplitude-modulated sine waves at varying carrier
 frequencies 'fc' and modulation frequencies 'fm', and compares with values
-taken from Fastl & Zwicker [2], Fig. 11.2.
+taken from Fastl & Zwicker [2], Figure 11.2 (similar to Figure C.1 from
+ECMA-418-2 [1]).
 
 References:
     
@@ -21,17 +22,19 @@ Author:
     Jan 2024
 """
 
-
 # Standard imports
 import numpy as np
 import matplotlib.pyplot as plt
+plt.close('all')
 
 # Local application imports
 from mosqito.sq_metrics import roughness_dw, roughness_ecma
 from mosqito.sq_metrics.roughness.utils import _create_am_bbn, _create_am_sin
 
+# must be run from 'MoSQITo/validations/sq_metrics/roughness_ecma' folder!
 from input.references import ref_zf
 
+save_fig = True
 
 
 # %% preliminary definitions
@@ -79,6 +82,8 @@ plt.title('Fastl & Zwicker, Fig. 11.2')
 
 for i, fc in enumerate(fc_all):
     
+    print(f'Testing fc = {fc} Hz...')
+    
     fm_array = np.logspace(np.log10(fm_all[0, i]),
                            np.log10(fm_all[1, i]), N_interp_fm, base=10)
     
@@ -96,16 +101,17 @@ for i, fc in enumerate(fc_all):
         # test signal - amplitude-modulated sine wave
         x = _create_am_sin(spl, fc, xm, fs)
 
-        # plt.figure()
-        # plt.plot(t, x)
-        
         # calculate Roughness using DW model
         R_dw_temp, _, _, _ = roughness_dw(x, fs=fs, overlap=0.5)
         R_dw[j] = np.mean(R_dw_temp)
         
         # calculate Roughness using ECMA model
         R_ecma_temp, _, _, _ = roughness_ecma(x, fs)
-        R_ecma[j] = np.percentile(R_ecma_temp, 90)
+        R_ecma[j] = np.percentile(R_ecma_temp[16:], 90)
+        
+        # test for 0.1 asper tolerance relative to Fastl & Zwicker
+        test = ((R_ecma < R_fz + 0.1).all()
+                and (R_ecma > R_fz - 0.1).all())
         
     # plot comparison
     plt.figure()
@@ -113,7 +119,7 @@ for i, fc in enumerate(fc_all):
     plt.loglog(fm_array, R_ecma, 'o', color='C0', 
                label='MoSQITo [ECMA-418-2]')
     
-    plt.loglog(fm_array, R_dw, 's', linewidth=1.5, color='C1',
+    plt.loglog(fm_array, R_dw, 's', fillstyle='none', linewidth=1.5, color='C1',
                label='MoSQITo [Daniel & Weber]')
 
     plt.loglog(fm_array, R_fz, '--', linewidth=2, color='0.45',
@@ -124,9 +130,30 @@ for i, fc in enumerate(fc_all):
     
     plt.legend()
     plt.grid(which='both')
-    plt.xlim([10, 400])
-    plt.ylim([0.07, 1])
-    plt.xlabel(r'Modulation Frequency $f_m$ [Hz]')
-    plt.ylabel('Roughness [asper]')
-    plt.title(rf'Carrier frequency $f_c$={fc} Hz')
     
+    plt.yticks(ticks=[0.1, 0.2, 0.5, 1.],
+               labels=['0.1', '0.2', '0.5', '1'])
+    plt.xticks(ticks=[10, 20, 50, 100, 200, 400],
+               labels=['10', '20', '50', '100', '200', '400'])
+    
+    plt.xlim([10, 400])
+    plt.ylim([0.07, 2])
+    plt.xlabel(r'Modulation Frequency $f_m$ [Hz]', fontsize=13)
+    plt.ylabel('Roughness [asper]', fontsize=13)
+    plt.title(rf'Roughness for AM sine wave, $f_c$={fc} Hz', fontsize=14)
+    
+    if test:
+        plt.text( 0.5, 0.5, "Test passed (0.1 asper tolerance not exceeded)", fontsize=13,
+            horizontalalignment="center", verticalalignment="center",
+            transform=plt.gca().transAxes, bbox=dict(facecolor="green", alpha=0.3))
+    else:
+        plt.text(0.5, 0.5, "Test not passed", fontsize=13,
+                 horizontalalignment="center", verticalalignment="center",
+                 transform=plt.gca().transAxes, bbox=dict(facecolor="red", alpha=0.3))
+    
+    plt.tight_layout()
+    
+    if save_fig:
+        plt.savefig(f'output/validation_roughness_ecma_fc{fc}Hz.png')
+    
+    print('\tDone!')
