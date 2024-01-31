@@ -50,12 +50,27 @@ def _interpolate_to_50Hz(A, time_array, n_samples, fs):
     
     # Last sample to be evaluated (Eq. 103) - removes the results belonging to
     # the zero-padding done at the start of the processing
-    l50_end = np.ceil(n_samples*fs_50/fs)
+    l50_end = int(np.ceil(n_samples*fs_50/fs))
     
-    t_50 = np.arange(l50_end) * (1./fs_50)
+    t_50 = np.arange(l50_end+1) * (1./fs_50)
     
     # interpolate using Piecewise cubic Hermitian Interpolating Polynomial (PCHIP)
     R_est = si.pchip_interpolate(time_array[0, :], A, t_50, axis=-1)
+    
+    # -------------------------------------------------------------------------
+    # select a critical band to plot
+    
+    # import matplotlib.pyplot as plt
+    
+    # z = 15
+    
+    # plt.figure()
+    # plt.plot(time_array[z, :], A[z, :], 'o:', label='A')
+    # plt.plot(t_50, R_est[z, :], '*--', label='R_est')
+    # plt.legend()
+    # plt.vlines(t_50[l50_end], np.min(A), np.max(A), color='k', linestyle='-.')
+    # plt.grid()
+    # -------------------------------------------------------------------------
     
     # set negative values to zero
     R_est = np.clip(R_est, 0., None)
