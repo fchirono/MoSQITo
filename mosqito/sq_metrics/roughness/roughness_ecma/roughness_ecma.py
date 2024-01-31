@@ -150,7 +150,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     sh_ = sh//downsampling_factor       # 128 points
     
     
-    # --------------------------------------------------------------------
+    # .........................................................................
     # compare original and downsampled envelope
     
     # from mosqito.utils.conversion import bark2freq
@@ -191,11 +191,12 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     non_zero = (N_max*Phi_env_zero != 0)
     
     scaling = np.zeros(N_basis.shape)
-    scaling[non_zero] = (N_basis**2)[non_zero] / (N_max * Phi_env_zero)[non_zero]
+    scaling[non_zero] = ( (N_basis**2)[non_zero]
+                         / (N_max * Phi_env_zero)[non_zero] )
     
     # 'Phi_env' is (53, L, sb_)-shaped
     Phi_env = (scaling[:, :, np.newaxis]
-               * np.abs( np.fft.fft(hann*p_env_downsampled) )**2 )
+               * np.abs( np.fft.fft(hann*p_env_downsampled, axis=-1) )**2 )
     
     # .........................................................................
     # plot scaled power spectrum for one time segment
@@ -207,7 +208,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # plt.figure()
     # plt.pcolormesh(f, bark_axis,
-    #                 10*np.log10(Phi_env[:, timestep_to_plot, :sb_//2+1]))
+    #                10*np.log10(Phi_env[:, timestep_to_plot, :sb_//2+1]))
     # plt.title(f'Scaled power spectrum of envelopes')
     # plt.xlabel('Freq [Hz]')
     # plt.ylabel('Critical band [Bark]')
@@ -227,6 +228,10 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # for each critical freq 'z', time step 'l'...
     for z in range(53):
         for l in range(L):
+            
+            # # dummy variables for debugging
+            # z = 10
+            # l = 8
             
             # 7.1.5.1. Peak picking
             f_pi, A_pi = _peak_picking(Phi_hat[z, l], fs_)
@@ -251,7 +256,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
             # if no peaks were found...
             else:
                 A[z, l] = 0.
-            
+        
     # ************************************************************************
     # 7.1.7 Calcuation of time-dependent specific roughness
     

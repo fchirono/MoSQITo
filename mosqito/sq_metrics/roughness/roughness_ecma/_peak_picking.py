@@ -120,8 +120,8 @@ def _peak_picking(Phi_hat_z_l, fs_):
             # ------------------------------------------------------------            
             # calculate correction factor following Eq. 78 to 81
             
-            # Eq. 80
-            theta_min_i = np.argmin(np.abs(beta))
+            # Eq. 80, for 0 <= theta <= 32
+            theta_min_i = np.argmin(np.abs(beta[:-1]))
             
             # Eq. 81
             cond1 = (theta[theta_min_i] > 0)
@@ -150,8 +150,8 @@ def _peak_picking(Phi_hat_z_l, fs_):
             # .........................................................................
             # # plot figure comparing the different values for rho
             
-            # # This entire approach (Eqs. 78 to 81) is identical to
-            # # using linear interpolation with Numpy:
+            # This entire approach (Eqs. 78 to 81) is identical to
+            # using linear interpolation with Numpy:
             # rho_np = np.interp(0, beta, E)
             
             # plt.figure()

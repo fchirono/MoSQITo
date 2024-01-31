@@ -43,14 +43,18 @@ def _env_noise_reduction(Phi_env):
     Phi_avg = np.zeros(Phi_env.shape)
     
     # average bands {0, 1}
-    Phi_avg[0, :, :] = (Phi_env[0, :, :] + Phi_env[1, :, :])/3.
+    Phi_avg[0, :, :] = (Phi_env[0, :, :]
+                        + Phi_env[1, :, :])/3.
     
     # average bands {n-1, n, n+1}    
     for z in range(1, 52):
-        Phi_avg[z, :, :] = (Phi_env[z-1, :, :] + Phi_env[z, :, :] + Phi_env[z+1, :, :])/3.
+        Phi_avg[z, :, :] = (Phi_env[z-1, :, :]
+                            + Phi_env[z, :, :]
+                            + Phi_env[z+1, :, :])/3.
     
     # average bands {51, 52}
-    Phi_avg[52, :, :] = (Phi_env[51, :, :] + Phi_env[52, :, :])/3.
+    Phi_avg[52, :, :] = (Phi_env[51, :, :]
+                         + Phi_env[52, :, :])/3.
     
     # .........................................................................
     # plot averaged power spectrum for one time segment
@@ -61,23 +65,20 @@ def _env_noise_reduction(Phi_env):
     # df_ = fs_/sb_
     # f = np.linspace(0, fs_ - df_, sb_)[:sb_//2+1]
     
-    # band_to_plot = 35
-    # timestep_to_plot = 8
+    # timestep_to_plot = 15
     
     # plt.figure()
     # plt.pcolormesh(f, bark_axis,
-    #                10*np.log10(Phi_avg[:, timestep_to_plot, :sb_//2+1]),
-    #                vmin=0, vmax=1)
-    # plt.title(f'Original power spectrum of envelopes')
+    #                 10*np.log10(Phi_env[:, timestep_to_plot, :sb_//2+1]))
+    # plt.title('Original power spectrum of envelopes')
     # plt.xlabel('Freq [Hz]')
     # plt.ylabel('Critical band [Bark]')
     # plt.colorbar()
     
     # plt.figure()
     # plt.pcolormesh(f, bark_axis,
-    #                10*np.log10(Phi_env[:, timestep_to_plot, :sb_//2+1]),
-    #                vmin=0, vmax=1)
-    # plt.title(f'Averaged power spectrum of envelopes')
+    #                 10*np.log10(Phi_avg[:, timestep_to_plot, :sb_//2+1]))
+    # plt.title('Averaged power spectrum of envelopes')
     # plt.xlabel('Freq [Hz]')
     # plt.ylabel('Critical band [Bark]')
     # plt.colorbar()
@@ -86,6 +87,7 @@ def _env_noise_reduction(Phi_env):
     # Sum the averaged Power spectra to get an overview of all the modulation
     # patterns over time (Eq. 68)
     s_ = np.sum(Phi_avg, axis=0)
+    
     
     # median of 's_(L, k)' between k=2 and k=255
     k_range = np.arange(2, sb_//2)
