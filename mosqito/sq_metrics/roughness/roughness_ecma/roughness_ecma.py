@@ -149,6 +149,32 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     sb_ = sb//downsampling_factor       # 512 points
     sh_ = sh//downsampling_factor       # 128 points
     
+    
+    # --------------------------------------------------------------------
+    # compare original and downsampled envelope
+    
+    # from mosqito.utils.conversion import bark2freq
+    
+    # band_to_plot = 45
+    # timestep_to_plot = 8
+    
+    # t = np.linspace(0, (sb-1)/fs, sb)
+    # t_ = np.linspace(0, (sb_-1)/fs_, sb_)
+    
+    # plt.figure()
+    # plt.plot(t, p_env[band_to_plot, timestep_to_plot, :], 'o-',
+    #           label='Envelope [original]')
+    
+    # # plot every 32nd sample in p_env for visual reference
+    # plt.plot(t[::32], p_env[band_to_plot, timestep_to_plot, ::32], 'ro',
+    #          label='Envelope [every 32nd sample]')
+    
+    # plt.plot(t_, p_env_downsampled[band_to_plot, timestep_to_plot, :], 's:',
+    #           label='Envelope [downsampled]')
+    # plt.legend()
+    # plt.grid()
+    # plt.title(f'{band_to_plot} Bark ({bark2freq(bark_axis[band_to_plot])} Hz)')
+    
     # ************************************************************************
     # 7.1.3 Calculation of scaled power spectrum
     
