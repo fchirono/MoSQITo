@@ -78,6 +78,10 @@ plt.xlabel(r'Modulation frequency $f_{m} [Hz]$')
 plt.ylabel('Roughness [asper]')
 plt.title('Fastl & Zwicker, Fig. 11.2')
 
+
+if save_fig:
+    plt.savefig(f'output/Fast_Zwicker_Fig_11_2.png')
+
 # %% create test signals
 
 for i, fc in enumerate(fc_all):
