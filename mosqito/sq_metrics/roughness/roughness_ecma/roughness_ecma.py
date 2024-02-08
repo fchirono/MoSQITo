@@ -136,7 +136,11 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # plt.plot(t, block_array[band_to_plot, timestep_to_plot, :], ':',
     #           label='Bandpass Signal')
     # plt.legend()
-    # plt.title(f'{band_to_plot} Bark ({bark2freq(bark_axis[band_to_plot])} Hz)')
+    # plt.xlim([0, 0.03])
+    # plt.title(f'{bark_axis[band_to_plot]:1.0f} Bark ({bark2freq(bark_axis[band_to_plot]):1.0f} Hz)')
+    # plt.tight_layout()
+    
+    # # plt.savefig(f'02_BandpassedSignalsEnvelope_CritBand{band_to_plot}.png')
     # .........................................................................
     
     # Downsampling by a total factor of 32, in two separate steps of 8 and 4
@@ -155,7 +159,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # from mosqito.utils.conversion import bark2freq
     
-    # band_to_plot = 45
+    # band_to_plot = 35
     # timestep_to_plot = 8
     
     # t = np.linspace(0, (sb-1)/fs, sb)
@@ -163,17 +167,21 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # plt.figure()
     # plt.plot(t, p_env[band_to_plot, timestep_to_plot, :], 'o-',
-    #           label='Envelope [original]')
+    #          label='Envelope [original]')
     
-    # # plot every 32nd sample in p_env for visual reference
-    # plt.plot(t[::32], p_env[band_to_plot, timestep_to_plot, ::32], 'ro',
-    #          label='Envelope [every 32nd sample]')
+    # # # plot every 32nd sample in p_env for visual reference
+    # # plt.plot(t[::32], p_env[band_to_plot, timestep_to_plot, ::32], 's-.',
+    # #          color='C1', label='Envelope [every 32nd sample]')
     
-    # plt.plot(t_, p_env_downsampled[band_to_plot, timestep_to_plot, :], 's:',
-    #           label='Envelope [downsampled]')
+    # plt.plot(t_, p_env_downsampled[band_to_plot, timestep_to_plot, :], '^:',
+    #          markersize=12, color='C3', label='Envelope [downsampled]')
     # plt.legend()
     # plt.grid()
-    # plt.title(f'{band_to_plot} Bark ({bark2freq(bark_axis[band_to_plot])} Hz)')
+    # plt.xlim([0, 0.015])
+    # plt.tight_layout()
+    # plt.title(f'{bark_axis[band_to_plot]:1.0f} Bark ({bark2freq(bark_axis[band_to_plot]):1.0f} Hz)')
+    
+    # # plt.savefig(f'04_DownsampledSignalsEnvelope_CritBand{band_to_plot}.png')
     
     # ************************************************************************
     # 7.1.3 Calculation of scaled power spectrum
@@ -206,13 +214,17 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # df_ = fs_/sb_
     # f = np.linspace(0, fs_ - df_, sb_)[:sb_//2+1]
     
+    # Pspec = 10*np.log10(Phi_env[:, timestep_to_plot, :sb_//2+1])
+    
     # plt.figure()
-    # plt.pcolormesh(f, bark_axis,
-    #                10*np.log10(Phi_env[:, timestep_to_plot, :sb_//2+1]))
+    # plt.pcolormesh(f, bark_axis, Pspec,
+    #             vmax=np.max(Pspec), vmin=np.max(Pspec)-80)
     # plt.title(f'Scaled power spectrum of envelopes')
     # plt.xlabel('Freq [Hz]')
     # plt.ylabel('Critical band [Bark]')
     # plt.colorbar()
+    
+    # # plt.savefig(f'05_ScaledEnvelopePowerSpectra.png')
     # .........................................................................
     
     # ************************************************************************
@@ -230,7 +242,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
         for l in range(L):
             
             # # dummy variables for debugging
-            # z = 10
+            # z = 15
             # l = 8
             
             # 7.1.5.1. Peak picking

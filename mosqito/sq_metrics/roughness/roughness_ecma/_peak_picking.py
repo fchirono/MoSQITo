@@ -66,10 +66,19 @@ def _peak_picking(Phi_hat_z_l, fs_):
         # .........................................................................
         # Plot Phi_hat
         
+        # df_ = fs_/sb_
+        # f = np.linspace(0, fs_ - df_, sb_)[:sb_//2+1]
+        
         # plt.figure()
-        # plt.plot(Phi_hat_z_l[:sb_//2+1], label='Phi hat')
-        # plt.plot(phi_peaks, Phi_hat_z_l[phi_peaks], 'r*', label='Peaks')
+        # plt.plot(f, Phi_hat_z_l[:sb_//2+1], label='Phi hat')
+        # plt.plot(f[phi_peaks], Phi_hat_z_l[phi_peaks], 'r*', label='Peaks')
+        # plt.ylim([-1, 10])
         # plt.legend()
+        # plt.ylabel('Magnitude')
+        # plt.xlabel('Freq [Hz]')
+        # plt.tight_layout()
+        
+        # # plt.savefig('07_PhiHat_Peaks.png')
         # .........................................................................
         
         # sort peak indices based on their prominences, from smallest to
@@ -150,8 +159,8 @@ def _peak_picking(Phi_hat_z_l, fs_):
             # .........................................................................
             # # plot figure comparing the different values for rho
             
-            # This entire approach (Eqs. 78 to 81) is identical to
-            # using linear interpolation with Numpy:
+            # # This entire approach (Eqs. 78 to 81) is identical to
+            # # using linear interpolation with Numpy:
             # rho_np = np.interp(0, beta, E)
             
             # plt.figure()
@@ -160,9 +169,15 @@ def _peak_picking(Phi_hat_z_l, fs_):
             # plt.plot(0, rho_, 'bs', markersize=12, label='Eq. 78 (as published)')
             # plt.plot(0, rho, 'mo', markersize=8, label='Eq. 78 (corrected)')
             # plt.grid()
-            # plt.xlabel('beta(theta)')
-            # plt.ylabel('E(theta)')
+            # plt.xlabel(r'$\beta(\theta)$', fontsize=14)
+            # plt.ylabel(r'E($\theta$)', fontsize=14)
             # plt.legend()
+            # plt.xlim([-0.5, 0.2])
+            # plt.ylim([-0.35, 0.])
+            # plt.tight_layout()
+            
+            # # plt.savefig('07_LinearInterpolation.png')
+            
             # .........................................................................
             
             # Corrected modulation rate (Eq. 77)

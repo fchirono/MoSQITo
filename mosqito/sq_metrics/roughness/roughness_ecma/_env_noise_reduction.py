@@ -65,23 +65,32 @@ def _env_noise_reduction(Phi_env):
     # df_ = fs_/sb_
     # f = np.linspace(0, fs_ - df_, sb_)[:sb_//2+1]
     
-    # timestep_to_plot = 15
+    # timestep_to_plot = 8
+    
+    # Pspec1 = 10*np.log10(Phi_env[:, timestep_to_plot, :sb_//2+1])
     
     # plt.figure()
-    # plt.pcolormesh(f, bark_axis,
-    #                 10*np.log10(Phi_env[:, timestep_to_plot, :sb_//2+1]))
+    # plt.pcolormesh(f, bark_axis, Pspec1,
+    #                vmax = np.max(Pspec1), vmin=np.max(Pspec1)-80)
     # plt.title('Original power spectrum of envelopes')
     # plt.xlabel('Freq [Hz]')
     # plt.ylabel('Critical band [Bark]')
     # plt.colorbar()
+    # plt.tight_layout()
+    
+    # # plt.savefig('05_ScaledEnvelopePowerSpectra_original.png')
     
     # plt.figure()
-    # plt.pcolormesh(f, bark_axis,
-    #                 10*np.log10(Phi_avg[:, timestep_to_plot, :sb_//2+1]))
+    # Pspec2 = 10*np.log10(Phi_avg[:, timestep_to_plot, :sb_//2+1])
+    # plt.pcolormesh(f, bark_axis, Pspec2,
+    #                vmax = np.max(Pspec2), vmin=np.max(Pspec2)-80)
     # plt.title('Averaged power spectrum of envelopes')
     # plt.xlabel('Freq [Hz]')
     # plt.ylabel('Critical band [Bark]')
     # plt.colorbar()
+    # plt.tight_layout()
+    
+    # # plt.savefig('05_ScaledEnvelopePowerSpectra_averaged.png')
     # .........................................................................
     
     # Sum the averaged Power spectra to get an overview of all the modulation
@@ -122,6 +131,7 @@ def _env_noise_reduction(Phi_env):
     # .........................................................................
     # plot weighting value 'w' for one time segment
     
+    # fs_ = 1500
     # df_ = fs_/sb_
     # f = np.linspace(0, fs_ - df_, sb_)[:sb_//2+1]
     
@@ -131,6 +141,10 @@ def _env_noise_reduction(Phi_env):
     # plt.xlabel('Freq [Hz]')
     # plt.ylabel('Time step')
     # plt.colorbar()
+    # plt.tight_layout()
+    
+    # # plt.savefig('06_WeightingCoefficient_w.png')
+    
     # .........................................................................
     
     # weighted, averaged Power Spectra (Eq. 69)
