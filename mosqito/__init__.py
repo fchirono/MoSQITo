@@ -2,8 +2,6 @@ from mosqito.sound_level_meter.noct_spectrum.noct_spectrum import noct_spectrum
 from mosqito.sound_level_meter.noct_spectrum.noct_synthesis import noct_synthesis
 from mosqito.sound_level_meter.spectrum import spectrum
 
-from mosqito.sq_metrics.fluctuation_strength.fluctuation_strength.fluctuation_strength import fluctuation_strength
-
 from mosqito.sq_metrics.loudness.loudness_ecma.loudness_ecma import loudness_ecma
 from mosqito.sq_metrics.loudness.loudness_zwst.loudness_zwst import loudness_zwst
 from mosqito.sq_metrics.loudness.loudness_zwst.loudness_zwst_freq import loudness_zwst_freq
