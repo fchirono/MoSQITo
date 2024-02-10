@@ -232,6 +232,26 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     Phi_hat = _env_noise_reduction(Phi_env)
     
+    # .........................................................................
+    # plot scaled power spectrum for one time segment
+    
+    # timestep_to_plot = 8
+    
+    # df_ = fs_/sb_
+    # f = np.linspace(0, fs_ - df_, sb_)[:sb_//2+1]
+    
+    # Pspec = 10*np.log10(Phi_hat[:, timestep_to_plot, :sb_//2+1])
+    
+    # plt.figure()
+    # plt.pcolormesh(f, bark_axis, Pspec,
+    #             vmax=np.max(Pspec), vmin=np.max(Pspec)-80)
+    # plt.title(f'Noise-suppressed power spectrum of envelopes')
+    # plt.xlabel('Freq [Hz]')
+    # plt.ylabel('Critical band [Bark]')
+    # plt.colorbar()
+    # plt.tight_layout()
+    # plt.savefig(f'05_NoiseSuppressedPowerSpectra.png')
+    
     # ************************************************************************
     # 7.1.5 Spectral weighting
     
@@ -242,7 +262,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
         for l in range(L):
             
             # # dummy variables for debugging
-            # z = 15
+            # z = 35
             # l = 8
             
             # 7.1.5.1. Peak picking
@@ -268,7 +288,20 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
             # if no peaks were found...
             else:
                 A[z, l] = 0.
-        
+    
+    # .........................................................................
+    # plot scaled peak amplitudes
+    
+    # plt.figure()
+    # plt.pcolormesh(time_array[0], bark_axis, A)
+    # plt.title(f"Weighted peaks' magnitudes")
+    # plt.xlabel('Time [s]')
+    # plt.ylabel('Critical band [Bark]')
+    # plt.colorbar()
+    # plt.tight_layout()
+    # plt.savefig(f'08_WeightedPeaksMagnitudes.png')   
+    
+    
     # ************************************************************************
     # 7.1.7 Calcuation of time-dependent specific roughness
     

@@ -57,5 +57,23 @@ def _lowpass_filtering(R_hat, fs_50):
     R_spec[:, 1:] = ( R_hat[:, 1:] * (1 - exp_[:, 1:])
                      + R_hat[:, 0:-1] * exp_[:, 1:] )
     
+    
+    # -------------------------------------------------------------------------
+    # select a critical band to plot
+    
+    # import matplotlib.pyplot as plt
+    
+    # z = 25
+    
+    # plt.figure()
+    # plt.plot(R_spec[z, :], '*--', label='R_spec')
+    # plt.legend()
+    # plt.xlabel('Time [s]')
+    # plt.ylabel('Roughness [estimate]')
+    # plt.grid()
+    # plt.tight_layout()
+    # plt.savefig('08_LowpassFiltering.png')
+    # -------------------------------------------------------------------------
+    
     return R_spec
             

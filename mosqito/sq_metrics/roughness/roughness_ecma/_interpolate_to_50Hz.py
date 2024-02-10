@@ -65,7 +65,7 @@ def _interpolate_to_50Hz(A, time_array, n_samples, fs):
     
     # import matplotlib.pyplot as plt
     
-    # z = 15
+    # z = 25
     
     # plt.figure()
     # plt.plot(time_array[z, :], A[z, :], 'o:', label='A')
@@ -77,6 +77,7 @@ def _interpolate_to_50Hz(A, time_array, n_samples, fs):
     #             linestyle='-.')
     # plt.grid()
     # plt.tight_layout()
+    # plt.savefig('08_interpolated_50Hz.png')
     # -------------------------------------------------------------------------
 
     return R_est, t_50, fs_50

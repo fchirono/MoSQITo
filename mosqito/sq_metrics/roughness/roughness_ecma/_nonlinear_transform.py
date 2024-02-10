@@ -47,5 +47,22 @@ def _nonlinear_transform(R_est):
     # time-dependent specific roughness estimate (Eq. 104)
     R_hat = c_R * (R_est ** E_l)
     
+    # -------------------------------------------------------------------------
+    # select a critical band to plot
+    
+    # import matplotlib.pyplot as plt
+    
+    # z = 25
+    
+    # plt.figure()
+    # plt.plot(R_hat[z, :], '*--', label='R_hat')
+    # plt.legend()
+    # plt.xlabel('Time [s]')
+    # plt.ylabel('Roughness [estimate]')
+    # plt.grid()
+    # plt.tight_layout()
+    # plt.savefig('08_NonlinearTransform.png')
+    # -------------------------------------------------------------------------
+    
     return R_hat
             
