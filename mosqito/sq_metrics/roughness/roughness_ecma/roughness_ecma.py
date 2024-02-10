@@ -125,22 +125,23 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # from mosqito.utils.conversion import bark2freq
     
-    # band_to_plot = 35
+    # z = 35
     # timestep_to_plot = 8
     
     # t = np.linspace(0, (sb-1)/fs, sb)
     
     # plt.figure()
-    # plt.plot(t, p_env[band_to_plot, timestep_to_plot, :],
+    # plt.plot(t, p_env[z, timestep_to_plot, :],
     #           label='Envelope')
-    # plt.plot(t, block_array[band_to_plot, timestep_to_plot, :], ':',
+    # plt.plot(t, block_array[z, timestep_to_plot, :], ':',
     #           label='Bandpass Signal')
     # plt.legend()
     # plt.xlim([0, 0.03])
-    # plt.title(f'{bark_axis[band_to_plot]:1.0f} Bark ({bark2freq(bark_axis[band_to_plot]):1.0f} Hz)')
+    # plt.xlabel('Time [s]')
+    # plt.title(f'{bark_axis[z]:1.1f} Bark ({bark2freq(bark_axis[z]):1.0f} Hz)')
     # plt.tight_layout()
     
-    # # plt.savefig(f'02_BandpassedSignalsEnvelope_CritBand{band_to_plot}.png')
+    # plt.savefig(f'02_BandpassedSignalsEnvelope.png')
     # .........................................................................
     
     # Downsampling by a total factor of 32, in two separate steps of 8 and 4
@@ -159,29 +160,29 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # from mosqito.utils.conversion import bark2freq
     
-    # band_to_plot = 35
+    # z = 35
     # timestep_to_plot = 8
     
     # t = np.linspace(0, (sb-1)/fs, sb)
     # t_ = np.linspace(0, (sb_-1)/fs_, sb_)
     
     # plt.figure()
-    # plt.plot(t, p_env[band_to_plot, timestep_to_plot, :], 'o-',
-    #          label='Envelope [original]')
+    # plt.plot(t, p_env[z, timestep_to_plot, :], 'o-',
+    #           label='Envelope [original]')
     
     # # # plot every 32nd sample in p_env for visual reference
-    # # plt.plot(t[::32], p_env[band_to_plot, timestep_to_plot, ::32], 's-.',
+    # # plt.plot(t[::32], p_env[z, timestep_to_plot, ::32], 's-.',
     # #          color='C1', label='Envelope [every 32nd sample]')
     
-    # plt.plot(t_, p_env_downsampled[band_to_plot, timestep_to_plot, :], '^:',
-    #          markersize=12, color='C3', label='Envelope [downsampled]')
+    # plt.plot(t_, p_env_downsampled[z, timestep_to_plot, :], '^:',
+    #           markersize=12, color='C3', label='Envelope [downsampled]')
     # plt.legend()
     # plt.grid()
     # plt.xlim([0, 0.015])
     # plt.tight_layout()
-    # plt.title(f'{bark_axis[band_to_plot]:1.0f} Bark ({bark2freq(bark_axis[band_to_plot]):1.0f} Hz)')
+    # plt.title(f'{bark_axis[z]:1.0f} Bark ({bark2freq(bark_axis[z]):1.0f} Hz)')
     
-    # # plt.savefig(f'04_DownsampledSignalsEnvelope_CritBand{band_to_plot}.png')
+    # plt.savefig(f'04_DownsampledSignalsEnvelope.png')
     
     # ************************************************************************
     # 7.1.3 Calculation of scaled power spectrum

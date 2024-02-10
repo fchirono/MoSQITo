@@ -51,8 +51,11 @@ def _nonlinear_transform(R_est):
     # select a critical band to plot
     
     # import matplotlib.pyplot as plt
+    # from mosqito.utils.conversion import bark2freq
     
-    # z = 25
+    # bark_axis = np.linspace(0.5, 26.5, num=53, endpoint=True)
+    
+    # z = 35
     
     # plt.figure()
     # plt.plot(R_hat[z, :], '*--', label='R_hat')
@@ -60,6 +63,7 @@ def _nonlinear_transform(R_est):
     # plt.xlabel('Time [s]')
     # plt.ylabel('Roughness [estimate]')
     # plt.grid()
+    # plt.title(f'{bark_axis[z]:1.1f} Bark ({bark2freq(bark_axis[z]):1.0f} Hz)')
     # plt.tight_layout()
     # plt.savefig('08_NonlinearTransform.png')
     # -------------------------------------------------------------------------

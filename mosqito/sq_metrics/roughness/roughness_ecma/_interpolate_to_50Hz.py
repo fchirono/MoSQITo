@@ -64,8 +64,11 @@ def _interpolate_to_50Hz(A, time_array, n_samples, fs):
     # select a critical band to plot
     
     # import matplotlib.pyplot as plt
+    # from mosqito.utils.conversion import bark2freq
     
-    # z = 25
+    # bark_axis = np.linspace(0.5, 26.5, num=53, endpoint=True)
+    
+    # z = 35
     
     # plt.figure()
     # plt.plot(time_array[z, :], A[z, :], 'o:', label='A')
@@ -76,6 +79,7 @@ def _interpolate_to_50Hz(A, time_array, n_samples, fs):
     # plt.vlines(t_50[l50_end], np.min(A[z, :]), np.max(A[z, :]), color='k',
     #             linestyle='-.')
     # plt.grid()
+    # plt.title(f'{bark_axis[z]:1.1f} Bark ({bark2freq(bark_axis[z]):1.0f} Hz)')
     # plt.tight_layout()
     # plt.savefig('08_interpolated_50Hz.png')
     # -------------------------------------------------------------------------
