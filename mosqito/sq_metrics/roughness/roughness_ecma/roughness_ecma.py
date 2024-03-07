@@ -106,6 +106,8 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # 5.1.5 Segmentation into blocks    
     block_array, time_array = _ecma_time_segmentation(bandpass_signals,
                                                       sb, sh, n_new)
+    
+    # compensate for '_ecma_time_segmentation' implementation
     time_array = np.array(time_array)[:, :, 0]
     
     # block_array is (53, L, sb)-shaped
