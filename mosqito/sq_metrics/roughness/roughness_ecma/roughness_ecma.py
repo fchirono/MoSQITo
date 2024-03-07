@@ -20,7 +20,7 @@ from mosqito.sq_metrics.loudness.loudness_ecma.loudness_ecma import loudness_ecm
 from mosqito.sq_metrics.loudness.loudness_ecma._band_pass_signals import _band_pass_signals
 from mosqito.sq_metrics.loudness.loudness_ecma._ecma_time_segmentation import _ecma_time_segmentation
 from mosqito.sq_metrics.loudness.loudness_ecma._auditory_filters_centre_freq import _auditory_filters_centre_freq
-from mosqito.sq_metrics.loudness.loudness_ecma._windowing_zeropadding import _windowing_zeropadding
+from mosqito.sq_metrics.loudness.loudness_ecma._preprocessing import _preprocessing
 
 from mosqito.sq_metrics.roughness.roughness_ecma._von_hann import _von_hann
 from mosqito.sq_metrics.roughness.roughness_ecma._env_noise_reduction import _env_noise_reduction
@@ -88,8 +88,8 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # Calculate time-dependent specific loudness N'(l, z)
     # --> N_basis is (53, L)-shaped, where L is the number of time segments
-    N_basis, bark_axis = loudness_ecma(signal, sb, sh)
-    N_basis = np.array(N_basis)
+    N, N_time, N_spec, bark_axis, time_axis = loudness_ecma(signal, fs, sb, sh)
+    N_basis = np.array(N_spec)
     
     # Number of time segments
     L = N_basis.shape[1]
@@ -98,7 +98,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     F = _auditory_filters_centre_freq()
     
     # 5.1.2 Windowing and zero-padding
-    signal, n_new = _windowing_zeropadding(signal, sb, sh)
+    signal, n_new = _preprocessing(signal, sb, sh)
 
     # 5.1.3, 5.1.4 - Computaton of band-pass signals
     bandpass_signals = _band_pass_signals(signal)
@@ -106,6 +106,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # 5.1.5 Segmentation into blocks    
     block_array, time_array = _ecma_time_segmentation(bandpass_signals,
                                                       sb, sh, n_new)
+    time_array = np.array(time_array)[:, :, 0]
     
     # block_array is (53, L, sb)-shaped
     block_array = np.array(block_array)
