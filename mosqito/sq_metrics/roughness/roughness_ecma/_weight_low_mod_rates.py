@@ -37,8 +37,8 @@ def _weight_low_mod_rates(f_p_imax, f_pi_hat, A_hat, F_z):
     
     Returns
     -------
-    A_pi_tilde : (N_peaks,)-shaped numpy.array
-        Weighted amplitudes of 'N_peaks' maxima in 'Phi_hat_z_l'
+    A : float
+        Summed and weighted amplitudes of modulation rates' peaks.
     """
 
     # Coefficients 'q1' and 'q2' for weighting factor 'G'

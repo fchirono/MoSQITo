@@ -225,6 +225,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # plt.xlabel('Freq [Hz]')
     # plt.ylabel('Critical band [Bark]')
     # plt.colorbar()
+    # plt.tight_layout()
     
     # # plt.savefig(f'05_ScaledEnvelopePowerSpectra.png')
     # .........................................................................
