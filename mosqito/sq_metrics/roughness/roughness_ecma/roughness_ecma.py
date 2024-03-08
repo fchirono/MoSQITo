@@ -125,7 +125,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # from mosqito.utils.conversion import bark2freq
     
-    # z = 35
+    # z = 15
     # timestep_to_plot = 8
     
     # t = np.linspace(0, (sb-1)/fs, sb)
@@ -160,7 +160,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # from mosqito.utils.conversion import bark2freq
     
-    # z = 35
+    # z = 15
     # timestep_to_plot = 8
     
     # t = np.linspace(0, (sb-1)/fs, sb)
@@ -179,8 +179,8 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     # plt.legend()
     # plt.grid()
     # plt.xlim([0, 0.015])
-    # plt.tight_layout()
     # plt.title(f'{bark_axis[z]:1.0f} Bark ({bark2freq(bark_axis[z]):1.0f} Hz)')
+    # plt.tight_layout()
     
     # plt.savefig(f'04_DownsampledSignalsEnvelope.png')
     
@@ -265,7 +265,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
         for l in range(L):
             
             # # dummy variables for debugging
-            # z = 30
+            # z = 21
             # l = 8
             
             # 7.1.5.1. Peak picking
@@ -278,10 +278,10 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
                 A_pi_tilde = _weight_high_mod_rates(f_pi, A_pi, F[z])
                 
                 # 7.1.5.3. Estimation of fundamental modulation rate
-                f_p_imax, f_pi_hat, A_hat = _est_fund_mod_rate(f_pi, A_pi_tilde)
+                f_p_imax, A_hat = _est_fund_mod_rate(f_pi, A_pi_tilde)
                 
                 # 7.1.5.4. Weighting of low modulation rates
-                A[z, l] = _weight_low_mod_rates(f_p_imax, f_pi_hat, A_hat, F[z])
+                A[z, l] = _weight_low_mod_rates(f_p_imax, A_hat, F[z])
             
                 # 7.1.6. Optional entropy weighting based on randomness of the
                 # modulation rate  --->>> NOT IMPLEMENTED! <<<---

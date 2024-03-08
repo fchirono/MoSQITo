@@ -38,10 +38,6 @@ def _est_fund_mod_rate(f_pi, A_pi_tilde):
     f_p_imax : float
         Estimated fundamental modulation rate of the envelope.
     
-    f_pi_hat : (N_peaks2,)-shaped numpy.array
-        Estimated frequencies of the power spectrum peaks that are considered
-        part of the envelope.
-    
     A_hat : (N_peaks2,)-shaped numpy.array
         Weighted amplitudes of the power spectrum peaks that are considered
         part of the envelope.
@@ -126,6 +122,8 @@ def _est_fund_mod_rate(f_pi, A_pi_tilde):
     
     A_hat = w_peak * A_pi_tilde[I_max]
     
-    f_pi_hat = f_pi[I_max]
+    # # Estimated frequencies of the power spectrum peaks that are considered
+    # # part of the envelope
+    # f_pi_hat = f_pi[I_max]
     
-    return f_p_imax, f_pi_hat, A_hat
+    return f_p_imax, A_hat
