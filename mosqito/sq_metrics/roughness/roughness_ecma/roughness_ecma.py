@@ -208,7 +208,8 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # 'Phi_env' is (53, L, sb_)-shaped
     Phi_env = (scaling[:, :, np.newaxis]
-               * np.abs( np.fft.fft(hann*p_env_downsampled, axis=-1) )**2 )
+               * np.abs(np.sqrt(2)
+                        * np.fft.fft(hann*p_env_downsampled, axis=-1) )**2 )
     
     # .........................................................................
     # plot scaled power spectrum for one time segment
@@ -266,7 +267,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
         for l in range(L):
             
             # # dummy variables for debugging
-            # z = 35
+            # z = 30
             # l = 8
             
             # 7.1.5.1. Peak picking

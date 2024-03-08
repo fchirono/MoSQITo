@@ -44,7 +44,7 @@ def _env_noise_reduction(Phi_env):
     
     # average bands {0, 1}
     Phi_avg[0, :, :] = (Phi_env[0, :, :]
-                        + Phi_env[1, :, :])/3.
+                        + Phi_env[1, :, :])/2.
     
     # average bands {n-1, n, n+1}    
     for z in range(1, 52):
@@ -54,7 +54,7 @@ def _env_noise_reduction(Phi_env):
     
     # average bands {51, 52}
     Phi_avg[52, :, :] = (Phi_env[51, :, :]
-                         + Phi_env[52, :, :])/3.
+                         + Phi_env[52, :, :])/2.
     
     # .........................................................................
     # plot averaged power spectrum for one time segment

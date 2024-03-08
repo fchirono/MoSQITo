@@ -52,7 +52,8 @@ def _weight_low_mod_rates(f_p_imax, f_pi_hat, A_hat, F_z):
     f_max = _f_max(F_z)
     
     # weighting factor G (Eq. 85)
-    G = _weight_factor_G(f_pi_hat, f_max, q1_low, q2_low)
+    #G = _weight_factor_G(f_pi_hat, f_max, q1_low, q2_low)
+    G = _weight_factor_G(f_p_imax, f_max, q1_low, q2_low)
     
     # Summation and weighting (Eq. 95)
     if f_p_imax < f_max:
