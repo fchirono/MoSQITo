@@ -172,7 +172,7 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     
     # # # plot every 32nd sample in p_env for visual reference
     # # plt.plot(t[::32], p_env[z, timestep_to_plot, ::32], 's-.',
-    # #          color='C1', label='Envelope [every 32nd sample]')
+    # #           color='C1', label='Envelope [every 32nd sample]')
     
     # plt.plot(t_, p_env_downsampled[z, timestep_to_plot, :], '^:',
     #           markersize=12, color='C3', label='Envelope [downsampled]')
@@ -194,14 +194,14 @@ def roughness_ecma(signal, fs, sb=16384, sh=4096):
     N_max = np.max(N_basis, axis=0)
     
     # Eq. 67
-    Phi_env_zero = np.sum( (hann*p_env_downsampled)**2 , axis=-1)
+    phi_env_zero = np.sum( (hann*p_env_downsampled)**2 , axis=-1)
     
     # Scaled power spectrum (Eq. 66)
-    non_zero = (N_max*Phi_env_zero != 0)
+    non_zero = (N_max*phi_env_zero != 0)
     
     scaling = np.zeros(N_basis.shape)
     scaling[non_zero] = ( (N_basis**2)[non_zero]
-                         / (N_max * Phi_env_zero)[non_zero] )
+                         / (N_max * phi_env_zero)[non_zero] )
     
     # 'Phi_env' is (53, L, sb_)-shaped
     Phi_env = (scaling[:, :, np.newaxis]
