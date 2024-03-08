@@ -80,7 +80,7 @@ plt.title('Fastl & Zwicker, Fig. 11.2')
 
 
 if save_fig:
-    plt.savefig(f'output/Fast_Zwicker_Fig_11_2.png')
+    plt.savefig('output/Fast_Zwicker_Fig_11_2.png')
 
 # %% create test signals
 
