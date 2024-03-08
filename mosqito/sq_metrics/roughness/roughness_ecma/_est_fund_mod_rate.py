@@ -10,6 +10,9 @@ Author:
 
 import numpy as np
 
+import warnings
+
+
 def _est_fund_mod_rate(f_pi, A_pi_tilde):
     """
     Estimates the fundamental modulation rate from an array of power spectrum 
@@ -67,23 +70,30 @@ def _est_fund_mod_rate(f_pi, A_pi_tilde):
             ic = np.nonzero(R_i0 == c)[0]
             I_i0_candidate.append( ic[0] )
         
-        # iterate over repeated values, pick the one that minimizes 'crit'
-        # (Eq. 89), and add to list of candidates
-        for c in values[counts>1]:
-            ic = np.nonzero(R_i0 == c)[0]
+        
+        # ---------------------------------------------------------------------
+        # catch and ignore warnings of "divide by zero"
+        with warnings.catch_warnings():     
+            warnings.filterwarnings("ignore", message="divide by zero encountered")
+        
+            # iterate over repeated values, pick the one that minimizes 'crit'
+            # (Eq. 89), and add to list of candidates
+            for c in values[counts>1]:
+                ic = np.nonzero(R_i0 == c)[0]
+                
+                crit = np.abs( (f_pi[ic] / (R_i0[ic] * f_pi[i0])) - 1)
+                
+                I_i0_candidate.append( ic[np.argmin(crit)] )
+    
+            # Create set 'I_i0' of indices of all maxima that belong to a harmonic
+            # complex with fundamental modulation rate f_pi[i0], with a 4%
+            # tolerance (Eq. 90)
+            I_i0 = [i for i in I_i0_candidate
+                    if np.abs((f_pi[i] / (R_i0[i] * f_pi[i0])) - 1) < 0.04 ]
+        
+            I_all.append(I_i0)
             
-            crit = np.abs( (f_pi[ic] / (R_i0[ic] * f_pi[i0])) - 1)
-        
-            I_i0_candidate.append( ic[np.argmin(crit)] )
-        
-        # Create set 'I_i0' of indices of all maxima that belong to a harmonic
-        # complex with fundamental modulation rate f_pi[i0], with a 4%
-        # tolerance (Eq. 90)
-        I_i0 = [i for i in I_i0_candidate
-                if np.abs((f_pi[i] / (R_i0[i] * f_pi[i0])) - 1) < 0.04 ]
-        
-        I_all.append(I_i0)
-        
+        # ---------------------------------------------------------------------
         # Energy of the harmonic complex (Eq. 91)
         E_i0[i0] = np.sum(A_pi_tilde[I_i0])
         
